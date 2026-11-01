@@ -11,9 +11,7 @@ import AirStatKit
 ///
 /// Three rules shape everything below.
 ///
-/// One line. No Apple status item stacks text, and two rows in a 22-point bar means
-/// two rows of type too small to read at a glance — which is the only thing a menu bar
-/// readout is for.
+/// Network throughput in text style uses two compact rows to save menu-bar space.
 ///
 /// Nothing is drawn that is not known. A sparkline with no samples is omitted, not
 /// flattened to a baseline: a full-width horizontal rule is indistinguishable from a
@@ -246,6 +244,8 @@ public final class MenuBarContentView: NSView {
         /// and the number share this one slot instead of taking a slot each, so the
         /// item is as wide as the wider of the two rather than as wide as their sum.
         var stack: CGFloat = 0
+        /// Upload and download share one column in the compact network style.
+        var networkStack: CGFloat = 0
 
         var width: CGFloat {
             var total: CGFloat = 0
@@ -263,6 +263,7 @@ public final class MenuBarContentView: NSView {
             append(statusDot, after: Layout.partGap)
             append(graph, after: Layout.partGap)
             append(stack, after: Layout.partGap)
+            append(networkStack, after: Layout.partGap)
             append(primaryGlyph, after: Layout.partGap)
             append(primaryValue, after: primaryGlyph > 0 ? Layout.glyphGap : Layout.partGap)
             append(secondaryGlyph, after: Layout.pairGap)
@@ -279,6 +280,11 @@ public final class MenuBarContentView: NSView {
     /// caption would be three rows of type in a 22-point bar.
     private func isStacked(_ item: MenuBarItemRender) -> Bool {
         item.caption != nil && item.style.drawsValue && !item.isUnavailable
+    }
+
+    private func isCompactNetwork(_ item: MenuBarItemRender) -> Bool {
+        item.style == .text && !item.isUnavailable
+            && item.primary.glyph == "↓" && item.secondary?.glyph == "↑"
     }
 
     private func geometry(for item: MenuBarItemRender, symbol: SymbolAsset?,
@@ -327,6 +333,15 @@ public final class MenuBarContentView: NSView {
             if let caption = item.caption {
                 geometry.bar += sideLabelWidth(caption) + Layout.glyphGap
             }
+            return geometry
+        }
+
+        if isCompactNetwork(item), let upload = item.secondary {
+            func rowWidth(_ line: MenuBarLine) -> CGFloat {
+                glyphWidth(line, role: .stackedValue) + Layout.glyphGap
+                    + reservedWidth(line, model: model, role: .stackedValue)
+            }
+            geometry.networkStack = max(rowWidth(item.primary), rowWidth(upload))
             return geometry
         }
 
@@ -481,6 +496,14 @@ public final class MenuBarContentView: NSView {
             x += geometry.stack
         }
 
+        if geometry.networkStack > 0, let upload = item.secondary {
+            gap(Layout.partGap)
+            drawNetworkStack(download: item.primary, upload: upload, x: x,
+                             columnWidth: geometry.networkStack, colors: colors,
+                             scale: scale, context: context)
+            x += geometry.networkStack
+        }
+
         if geometry.primaryValue > 0 {
             gap(Layout.partGap)
             if geometry.primaryGlyph > 0, let glyph = item.primary.glyph {
@@ -523,6 +546,25 @@ public final class MenuBarContentView: NSView {
     /// centring the line box would sit them visibly high.
     private func centeredBaseline(for role: FontRole) -> CGFloat {
         bounds.midY - fonts[role].capHeight / 2
+    }
+
+    private func drawNetworkStack(download: MenuBarLine, upload: MenuBarLine,
+                                  x: CGFloat, columnWidth: CGFloat, colors: ItemColors,
+                                  scale: CGFloat, context: CGContext) {
+        let cap = fonts[.stackedValue].capHeight
+        let total = cap * 2 + Design.MenuBar.stackedRowGap
+        let top = bounds.midY + total / 2 - cap
+        let bottom = bounds.midY - total / 2
+        for (line, baseline) in [(download, top), (upload, bottom)] {
+            let glyph = line.glyph ?? ""
+            let glyphSize = width(glyph, role: .stackedValue)
+            drawText(glyph, role: .stackedValue, x: x, baseline: baseline,
+                     color: colors.glyph, scale: scale, context: context)
+            let textSize = width(line.valueText, role: .stackedValue)
+            drawText(line.valueText, role: .stackedValue,
+                     x: max(x + glyphSize + Layout.glyphGap, x + columnWidth - textSize),
+                     baseline: baseline, color: colors.value, scale: scale, context: context)
+        }
     }
 
     /// Draws a caption above its number, both centred in the column the two share.
