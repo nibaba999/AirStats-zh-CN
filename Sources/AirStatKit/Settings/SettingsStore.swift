@@ -105,13 +105,13 @@ public final class SettingsStore {
         /// than one of these.
         public var label: String {
             switch self {
-            case .general: return "通用"
-            case .menuBar: return "菜单栏"
-            case .charts: return "图表"
-            case .desktopWidget: return "桌面小组件"
-            case .notifications: return "通知"
-            case .shortcuts: return "快捷键"
-            case .theme: return "颜色"
+            case .general: return L("通用", "General")
+            case .menuBar: return L("菜单栏", "Menu Bar")
+            case .charts: return L("图表", "Graph")
+            case .desktopWidget: return L("桌面小组件", "Desktop Widget")
+            case .notifications: return L("通知", "Notifications")
+            case .shortcuts: return L("快捷键", "Shortcuts")
+            case .theme: return L("颜色", "Colors")
             }
         }
     }

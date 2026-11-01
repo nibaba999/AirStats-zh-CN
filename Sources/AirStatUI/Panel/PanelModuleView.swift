@@ -126,7 +126,7 @@ struct PanelModuleView: View {
         }
         .accessibilityLabel(module.label)
         .accessibilityValue(summary.value ?? "")
-        .accessibilityHint(isExpanded ? "收起" : "展开")
+        .accessibilityHint(isExpanded ? L("收起", "Collapse") : L("展开", "Expand"))
     }
 
     @ViewBuilder
@@ -206,7 +206,7 @@ extension PanelSummary {
         case .memory:
             guard let memory = engine.memory.value else { return PanelSummary() }
             return PanelSummary(value: formatter.memory(memory.usedBytes),
-                                caption: "已用")
+                                caption: L("已用", "used"))
         case .gpu:
             guard let gpu = engine.gpu.value, let device = gpu.primary else { return PanelSummary() }
             guard let utilization = device.utilization else {
@@ -226,7 +226,7 @@ extension PanelSummary {
         case .disk:
             guard let disk = engine.disk.value, let root = disk.rootVolume else { return PanelSummary() }
             return PanelSummary(value: formatter.storage(root.availableBytes),
-                                caption: "可用")
+                                caption: L("可用", "free"))
         case .battery:
             guard let power = engine.power.value else { return PanelSummary() }
             guard power.hasBattery, let percentage = power.percentage else {
@@ -235,7 +235,7 @@ extension PanelSummary {
                                     emphasis: .state)
             }
             return PanelSummary(value: formatter.percentValue(percentage),
-                                caption: power.isCharging ? "充电中" : nil)
+                                caption: power.isCharging ? L("充电中", "charging") : nil)
         case .thermal:
             guard let thermal = engine.thermal.value else { return PanelSummary() }
             guard let celsius = thermal.cpuCelsius else {
@@ -246,10 +246,10 @@ extension PanelSummary {
         case .processes:
             guard let processes = engine.processes.value else { return PanelSummary() }
             return PanelSummary(value: formatter.count(processes.totalProcessCount),
-                                caption: "运行中")
+                                caption: L("运行中", "running"))
         case .system:
             guard let system = engine.system.value else { return PanelSummary() }
-            return PanelSummary(value: formatter.uptime(system.uptime), caption: "运行时间")
+            return PanelSummary(value: formatter.uptime(system.uptime), caption: L("运行时间", "uptime"))
         }
     }
 

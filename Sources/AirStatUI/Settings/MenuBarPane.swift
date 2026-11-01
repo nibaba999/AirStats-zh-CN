@@ -18,33 +18,33 @@ struct MenuBarPane: View {
     var body: some View {
         Form {
             Section {
-                Toggle("在菜单栏中显示", isOn: settings.binding(\.menuBar.isVisible))
+                Toggle(L("在菜单栏中显示", "Show in the menu bar"), isOn: settings.binding(\.menuBar.isVisible))
             }
 
             Section {
                 MenuBarPreviewStrip(model: previewModel, isEmpty: previewModel.items.isEmpty)
                     .listRowInsets(EdgeInsets())
             } header: {
-                Text("预览")
+                Text(L("预览", "Preview"))
             }
 
             Section {
                 readoutList
                 readoutListControls
             } header: {
-                Text("读数")
+                Text(L("读数", "Readouts"))
             }
             .disabled(!isVisible)
 
             Section {
-                Toggle("合并为一个菜单栏项目",
+                Toggle(L("合并为一个菜单栏项目", "Combine into one menu bar item"),
                        isOn: settings.binding(\.menuBar.usesCombinedItem))
             } header: {
-                Text("布局")
+                Text(L("布局", "Layout"))
             } footer: {
-                Text("合并后读数会保持在一起并按顺序排列。分开显示时，"
-                     + "可以与其他菜单栏图标一起调整顺序；当空间不足时，macOS "
-                     + "会逐个隐藏它们。")
+                Text(L("合并后读数会保持在一起并按顺序排列。分开显示时，", "One item keeps the readouts together and in order. Separate items ")
+                     + L("可以与其他菜单栏图标一起调整顺序；当空间不足时，macOS ", "can be rearranged among your other menu bar icons, and macOS ")
+                     + L("会逐个隐藏它们。", "hides them one at a time when the bar runs out of room."))
                 .font(.callout)
                 .foregroundStyle(Design.Palette.secondaryText)
             }
@@ -75,7 +75,7 @@ struct MenuBarPane: View {
                 }
             }
         }
-        .accessibilityLabel("菜单栏读数")
+        .accessibilityLabel(L("菜单栏读数", "Menu bar readouts"))
     }
 
     /// Everything a readout has, on the readout's own row.
@@ -93,14 +93,14 @@ struct MenuBarPane: View {
                 .labelsHidden()
                 .disabled(isLastEnabled(item))
                 .help(isLastEnabled(item)
-                      ? "至少保留一项读数，以便点击菜单栏项目。"
+                      ? L("至少保留一项读数，以便点击菜单栏项目。", "At least one readout must stay visible so the menu bar item remains clickable.")
                       : "Show \(item.metric.label) in the menu bar")
                 .accessibilityLabel("Show \(item.metric.label)")
 
             RowMenu(title: item.metric.label,
                     width: Self.metricColumn,
                     label: "\(item.metric.label) metric") {
-                Picker("指标", selection: metricBinding(for: item)) {
+                Picker(L("指标", "Metric"), selection: metricBinding(for: item)) {
                     ForEach(MenuBarMetric.allCases, id: \.self) { metric in
                         Text(metric.label).tag(metric)
                     }
@@ -132,7 +132,7 @@ struct MenuBarPane: View {
             // list of the same metrics doing the same job.
             RowIconButton(systemName: "trash",
                           help: items.count <= 1
-                              ? "不能移除最后一项读数。"
+                              ? L("不能移除最后一项读数。", "The last readout cannot be removed.")
                               : "Remove \(item.metric.label) from the menu bar",
                           label: "Remove \(item.metric.label)") {
                 remove(item)
@@ -141,7 +141,7 @@ struct MenuBarPane: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(item.metric.label)
-        .accessibilityValue("\(item.isEnabled ? "显示" : "隐藏"), \(item.style.label) style")
+        .accessibilityValue("\(item.isEnabled ? L("显示", "shown") : L("隐藏", "hidden")), \(item.style.label)")
     }
 
     /// The style popup, carrying the caption toggle with it.
@@ -152,7 +152,7 @@ struct MenuBarPane: View {
     private func styleMenu(_ item: MenuBarItemConfig) -> some View {
         RowMenu(title: item.style.label,
                 label: "\(item.metric.label) display style") {
-            Picker("显示方式", selection: styleBinding(for: item)) {
+            Picker(L("显示方式", "Display as"), selection: styleBinding(for: item)) {
                 ForEach(item.metric.supportedStyles, id: \.self) { style in
                     Text(style.label).tag(style)
                 }
@@ -186,11 +186,11 @@ struct MenuBarPane: View {
                     }
                 }
             } label: {
-                Label("添加读数", systemImage: "plus")
+                Label(L("添加读数", "Add Readout"), systemImage: "plus")
             }
             .menuStyle(.borderlessButton)
             .fixedSize()
-            .accessibilityLabel("添加读数")
+            .accessibilityLabel(L("添加读数", "Add Readout"))
 
             Spacer()
         }

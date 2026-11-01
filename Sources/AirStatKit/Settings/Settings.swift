@@ -23,8 +23,8 @@ public enum TemperatureUnit: String, Sendable, Codable, CaseIterable, Equatable,
 
     public var label: String {
         switch self {
-        case .celsius: return "摄氏度（°C）"
-        case .fahrenheit: return "华氏度（°F）"
+        case .celsius: return L("摄氏度（°C）", "Celsius (°C)")
+        case .fahrenheit: return L("华氏度（°F）", "Fahrenheit (°F)")
         }
     }
     public var suffix: String {
@@ -42,8 +42,8 @@ public enum NetworkRateUnit: String, Sendable, Codable, CaseIterable, Equatable,
 
     public var label: String {
         switch self {
-        case .bytes: return "字节每秒（MB/s）"
-        case .bits: return "比特每秒（Mbps）"
+        case .bytes: return L("字节每秒（MB/s）", "Bytes per second (MB/s)")
+        case .bits: return L("比特每秒（Mbps）", "Bits per second (Mbps)")
         }
     }
 }
@@ -57,8 +57,8 @@ public enum ByteUnitStyle: String, Sendable, Codable, CaseIterable, Equatable, H
 
     public var label: String {
         switch self {
-        case .binary: return "二进制（1 GB = 1024 MB）"
-        case .decimal: return "十进制（1 GB = 1000 MB）"
+        case .binary: return L("二进制（1 GB = 1024 MB）", "Binary (1 GB = 1024 MB)")
+        case .decimal: return L("十进制（1 GB = 1000 MB）", "Decimal (1 GB = 1000 MB)")
         }
     }
     public var base: Double { self == .binary ? 1024 : 1000 }
@@ -69,9 +69,9 @@ public enum AppearanceMode: String, Sendable, Codable, CaseIterable, Equatable, 
 
     public var label: String {
         switch self {
-        case .system: return "跟随系统"
-        case .light: return "浅色"
-        case .dark: return "深色"
+        case .system: return L("跟随系统", "Match System")
+        case .light: return L("浅色", "Light")
+        case .dark: return L("深色", "Dark")
         }
     }
 }
@@ -91,22 +91,22 @@ public enum MenuBarMetric: String, Sendable, Codable, CaseIterable, Equatable, H
 
     public var label: String {
         switch self {
-        case .cpuUsage: return "CPU 使用率"
-        case .cpuTemperature: return "CPU 温度"
-        case .cpuFrequency: return "CPU 频率"
-        case .memoryUsage: return "内存使用量"
-        case .memoryPressure: return "内存压力"
-        case .gpuUsage: return "GPU 使用率"
-        case .networkThroughput: return "网络（上传与下载）"
-        case .networkUpload: return "网络上传"
-        case .networkDownload: return "网络下载"
-        case .diskActivity: return "磁盘活动"
-        case .diskFree: return "磁盘可用空间"
-        case .battery: return "电池"
-        case .batteryTime: return "电池剩余时间"
-        case .systemPower: return "系统功耗"
-        case .fanSpeed: return "风扇转速"
-        case .uptime: return "运行时间"
+        case .cpuUsage: return L("CPU 使用率", "CPU Usage")
+        case .cpuTemperature: return L("CPU 温度", "CPU Temp")
+        case .cpuFrequency: return L("CPU 频率", "CPU Frequency")
+        case .memoryUsage: return L("内存使用量", "Memory Usage")
+        case .memoryPressure: return L("内存压力", "Memory Pressure")
+        case .gpuUsage: return L("GPU 使用率", "GPU Usage")
+        case .networkThroughput: return L("网络（上传与下载）", "Network (Up & Down)")
+        case .networkUpload: return L("网络上传", "Network Upload")
+        case .networkDownload: return L("网络下载", "Network Download")
+        case .diskActivity: return L("磁盘活动", "Disk Activity")
+        case .diskFree: return L("磁盘可用空间", "Disk Free")
+        case .battery: return L("电池", "Battery")
+        case .batteryTime: return L("电池剩余时间", "Battery Time Remaining")
+        case .systemPower: return L("系统功耗", "System Power")
+        case .fanSpeed: return L("风扇转速", "Fan Speed")
+        case .uptime: return L("运行时间", "uptime")
         }
     }
 
@@ -174,13 +174,13 @@ public enum MenuBarDisplayStyle: String, Sendable, Codable, CaseIterable, Equata
 
     public var label: String {
         switch self {
-        case .text: return "文字"
-        case .graph: return "图表"
-        case .textAndGraph: return "文字和图表"
-        case .iconAndText: return "图标和文字"
-        case .battery: return "电池指示器"
-        case .statusDot: return "状态圆点"
-        case .bar: return "紧凑条形图"
+        case .text: return L("文字", "Text")
+        case .graph: return L("图表", "Graph")
+        case .textAndGraph: return L("文字和图表", "Text & Graph")
+        case .iconAndText: return L("图标和文字", "Icon & Text")
+        case .battery: return L("电池指示器", "Battery Indicator")
+        case .statusDot: return L("状态圆点", "Status Dot")
+        case .bar: return L("紧凑条形图", "Compact Bar")
         }
     }
 
@@ -328,14 +328,14 @@ public enum PanelModule: String, Sendable, Codable, CaseIterable, Equatable, Has
     public var label: String {
         switch self {
         case .cpu: return "CPU"
-        case .memory: return "内存"
+        case .memory: return L("内存", "Memory")
         case .gpu: return "GPU"
-        case .network: return "网络"
-        case .disk: return "磁盘"
-        case .battery: return "电池"
-        case .thermal: return "温度"
-        case .processes: return "占用最高的进程"
-        case .system: return "系统"
+        case .network: return L("网络", "Network")
+        case .disk: return L("磁盘", "Disk")
+        case .battery: return L("电池", "Battery")
+        case .thermal: return L("温度", "Temperature")
+        case .processes: return L("占用最高的进程", "Top Processes")
+        case .system: return L("系统", "System")
         }
     }
 
@@ -448,9 +448,9 @@ public enum ChartStyle: String, Sendable, Codable, CaseIterable, Equatable, Hash
 
     public var label: String {
         switch self {
-        case .line: return "折线"
-        case .filledLine: return "填充折线"
-        case .bars: return "柱状图"
+        case .line: return L("折线", "Line")
+        case .filledLine: return L("填充折线", "Filled Line")
+        case .bars: return L("柱状图", "Bars")
         }
     }
 }
@@ -507,11 +507,11 @@ public enum DesktopWidgetCorner: String, Sendable, Codable, CaseIterable, Equata
 
     public var label: String {
         switch self {
-        case .topLeft: return "左上角"
-        case .topRight: return "右上角"
-        case .bottomLeft: return "左下角"
-        case .bottomRight: return "右下角"
-        case .free: return "自定义位置"
+        case .topLeft: return L("左上角", "Top Left")
+        case .topRight: return L("右上角", "Top Right")
+        case .bottomLeft: return L("左下角", "Bottom Left")
+        case .bottomRight: return L("右下角", "Bottom Right")
+        case .free: return L("自定义位置", "Custom Position")
         }
     }
 }
@@ -533,17 +533,17 @@ public enum DesktopWidgetDepth: String, Sendable, Codable, CaseIterable, Equatab
 
     public var label: String {
         switch self {
-        case .aboveEverything: return "始终置顶"
-        case .withWindows: return "与其他窗口同层"
-        case .wallpaper: return "桌面壁纸上"
+        case .aboveEverything: return L("始终置顶", "Above Everything")
+        case .withWindows: return L("与其他窗口同层", "With Other Windows")
+        case .wallpaper: return L("桌面壁纸上", "On the Wallpaper")
         }
     }
 
     public var detail: String {
         switch self {
-        case .aboveEverything: return "在全屏应用上方保持可见。"
-        case .withWindows: return "普通浮动窗口。"
-        case .wallpaper: return "位于所有窗口后方的桌面上。"
+        case .aboveEverything: return L("在全屏应用上方保持可见。", "Stays visible over full-screen apps.")
+        case .withWindows: return L("普通浮动窗口。", "A normal floating window.")
+        case .wallpaper: return L("位于所有窗口后方的桌面上。", "Behind every window, on the desktop picture.")
         }
     }
 }
@@ -654,13 +654,13 @@ public enum ThresholdMetric: String, Sendable, Codable, CaseIterable, Equatable,
 
     public var label: String {
         switch self {
-        case .cpuUsage: return "CPU 使用率持续高于"
-        case .memoryPressure: return "内存压力高于"
-        case .diskFree: return "启动磁盘可用空间低于"
-        case .batteryLow: return "电量低于"
-        case .batteryFull: return "电量达到"
-        case .cpuTemperature: return "CPU 温度高于"
-        case .thermalPressure: return "温度压力达到"
+        case .cpuUsage: return L("CPU 使用率持续高于", "Sustained CPU usage above")
+        case .memoryPressure: return L("内存压力高于", "Memory pressure above")
+        case .diskFree: return L("启动磁盘可用空间低于", "Startup disk free space below")
+        case .batteryLow: return L("电量低于", "Battery drops below")
+        case .batteryFull: return L("电量达到", "Battery reaches")
+        case .cpuTemperature: return L("CPU 温度高于", "CPU temperature above")
+        case .thermalPressure: return L("温度压力达到", "Thermal pressure reaches")
         }
     }
 
@@ -789,10 +789,10 @@ public enum ShortcutAction: String, Sendable, Codable, CaseIterable, Equatable, 
 
     public var label: String {
         switch self {
-        case .togglePanel: return "显示或隐藏面板"
-        case .toggleDesktopWidget: return "显示或隐藏桌面小组件"
-        case .toggleMenuBarItem: return "显示或隐藏菜单栏项目"
-        case .openSettings: return "打开设置"
+        case .togglePanel: return L("显示或隐藏面板", "Show / Hide Panel")
+        case .toggleDesktopWidget: return L("显示或隐藏桌面小组件", "Show / Hide Desktop Widget")
+        case .toggleMenuBarItem: return L("显示或隐藏菜单栏项目", "Show / Hide Menu Bar Item")
+        case .openSettings: return L("打开设置", "Open Settings")
         }
     }
 }

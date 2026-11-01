@@ -76,7 +76,7 @@ struct DesktopWidgetPreview: View {
                 .fill(.quaternary.opacity(0.5))
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("桌面小组件预览")
+        .accessibilityLabel(L("桌面小组件预览", "Desktop Widget preview"))
         .accessibilityValue(accessibilityValue)
     }
 

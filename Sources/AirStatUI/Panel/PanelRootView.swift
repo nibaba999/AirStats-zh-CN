@@ -182,7 +182,7 @@ struct PanelUpdateRow: View {
         update.isReadyToInstall ? "AirStats \(update.version) is ready" : "AirStats \(update.version) is available"
     }
 
-    private var action: String { update.isReadyToInstall ? "重新启动" : "Install" }
+    private var action: String { update.isReadyToInstall ? L("重新启动", "Restart") : "Install" }
 
     @State private var isHovering = false
 
@@ -222,10 +222,10 @@ struct PanelFooterView: View {
 
     var body: some View {
         HStack(spacing: Design.Space.xs) {
-            PanelFooterButton(title: "设置…", symbol: "gearshape", action: actions.openSettings)
+            PanelFooterButton(title: L("设置…", "Settings…"), symbol: "gearshape", action: actions.openSettings)
                 .keyboardShortcut(",", modifiers: .command)
             Spacer(minLength: Design.Space.m)
-            PanelFooterButton(title: "退出", symbol: "power", action: actions.quit)
+            PanelFooterButton(title: L("退出", "Quit"), symbol: "power", action: actions.quit)
                 .keyboardShortcut("q", modifiers: .command)
         }
         .padding(.horizontal, Design.Space.s)

@@ -162,7 +162,7 @@ final class AppCoordinator {
         desktopWidgetItem.target = self
         desktopWidgetItem.state = settingsStore.settings.desktopWidget.isEnabled ? .on : .off
         menu.addItem(.separator())
-        menu.addItem(withTitle: "退出 AirStats", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        menu.addItem(withTitle: L("退出 AirStats", "Quit AirStats"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         statusItem.presentMenu(menu)
     }
 

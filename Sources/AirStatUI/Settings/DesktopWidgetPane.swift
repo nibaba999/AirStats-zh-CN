@@ -19,7 +19,7 @@ struct DesktopWidgetPane: View {
             // beside it, and this row is the pane's subject rather than a section of
             // it — everything below configures the thing this switch puts on screen.
             Section {
-                Toggle("显示桌面小组件", isOn: settings.binding(\.desktopWidget.isEnabled))
+                Toggle(L("显示桌面小组件", "Show the desktop widget"), isOn: settings.binding(\.desktopWidget.isEnabled))
             }
 
             // The preview and the list that fills it, side by side. Stacked, the
@@ -42,42 +42,42 @@ struct DesktopWidgetPane: View {
                     .disabled(!desktopWidget.isEnabled)
                 }
             } header: {
-                Text("模块")
+                Text(L("模块", "Modules"))
             }
 
             Section {
-                SettingsSlider(title: "宽度",
+                SettingsSlider(title: L("宽度", "Width"),
                                value: settings.quantized(\.desktopWidget.width, step: 4),
                                range: 160...480,
                                format: SettingsLabels.points)
-                Toggle("使用紧凑布局", isOn: settings.binding(\.desktopWidget.isCompact))
-                Toggle("显示 24 小时历史记录", isOn: settings.binding(\.desktopWidget.showsHistoryChart))
-                SettingsSlider(title: "不透明度",
+                Toggle(L("使用紧凑布局", "Use compact layout"), isOn: settings.binding(\.desktopWidget.isCompact))
+                Toggle(L("显示 24 小时历史记录", "Show a 24-hour history"), isOn: settings.binding(\.desktopWidget.showsHistoryChart))
+                SettingsSlider(title: L("不透明度", "Opacity"),
                                value: settings.quantized(\.desktopWidget.opacity, step: 0.05),
                                range: 0.2...1,
                                format: SettingsLabels.percent)
-                Toggle("不使用时淡出", isOn: settings.binding(\.desktopWidget.dimsWhenInactive))
+                Toggle(L("不使用时淡出", "Fade when not in use"), isOn: settings.binding(\.desktopWidget.dimsWhenInactive))
                 if desktopWidget.dimsWhenInactive {
-                    SettingsSlider(title: "淡出时的不透明度",
+                    SettingsSlider(title: L("淡出时的不透明度", "Faded opacity"),
                                    value: settings.quantized(\.desktopWidget.inactiveOpacity, step: 0.05),
                                    range: 0.15...1,
                                    format: SettingsLabels.percent)
                 }
             } header: {
-                Text("大小和透明度")
+                Text(L("大小和透明度", "Size & Transparency"))
             }
             .disabled(!desktopWidget.isEnabled)
 
             Section {
-                Picker("位置", selection: settings.binding(\.desktopWidget.corner)) {
+                Picker(L("位置", "Location"), selection: settings.binding(\.desktopWidget.corner)) {
                     ForEach(DesktopWidgetCorner.allCases, id: \.self) { corner in
                         Text(corner.label).tag(corner)
                     }
                 }
                 if desktopWidget.corner == .free {
-                    LabeledContent("已保存的位置", value: savedPositionText)
+                    LabeledContent(L("已保存的位置", "Saved position"), value: savedPositionText)
                         .foregroundStyle(Design.Palette.secondaryText)
-                    Button("清除已保存的位置") {
+                    Button(L("清除已保存的位置", "Forget Saved Position")) {
                         settings.update {
                             $0.desktopWidget.originX = nil
                             $0.desktopWidget.originY = nil
@@ -86,20 +86,20 @@ struct DesktopWidgetPane: View {
                     .disabled(desktopWidget.originX == nil && desktopWidget.originY == nil)
                 }
             } header: {
-                Text("位置")
+                Text(L("位置", "Location"))
             }
             .disabled(!desktopWidget.isEnabled)
 
             Section {
-                Picker("图层", selection: settings.binding(\.desktopWidget.depth)) {
+                Picker(L("图层", "Layer"), selection: settings.binding(\.desktopWidget.depth)) {
                     ForEach(DesktopWidgetDepth.allCases, id: \.self) { depth in
                         Text(depth.label).tag(depth)
                     }
                 }
-                Toggle("允许鼠标穿透桌面小组件", isOn: settings.binding(\.desktopWidget.isClickThrough))
-                Toggle("在所有空间中显示", isOn: settings.binding(\.desktopWidget.showsOnAllSpaces))
+                Toggle(L("允许鼠标穿透桌面小组件", "Click through the desktop widget"), isOn: settings.binding(\.desktopWidget.isClickThrough))
+                Toggle(L("在所有空间中显示", "Show on all spaces"), isOn: settings.binding(\.desktopWidget.showsOnAllSpaces))
             } header: {
-                Text("行为")
+                Text(L("行为", "Behaviour"))
             } footer: {
                 Text(desktopWidget.depth.detail)
                     .font(.callout)
@@ -132,7 +132,7 @@ struct DesktopWidgetPane: View {
                         }
                         RowIconButton(systemName: "trash",
                                       help: desktopWidget.modules.count <= 1
-                                          ? "桌面小组件至少需要一个模块。"
+                                          ? L("桌面小组件至少需要一个模块。", "The desktop widget needs at least one module.")
                                           : "Remove \(module.label) from the desktop widget",
                                       label: "Remove \(module.label)") {
                             settings.update { $0.desktopWidget.modules.removeAll { $0 == module } }
@@ -154,7 +154,7 @@ struct DesktopWidgetPane: View {
                 }
             }
         }
-        .accessibilityLabel("桌面小组件模块")
+        .accessibilityLabel(L("桌面小组件模块", "Desktop Widget modules"))
     }
 
     private var moduleControls: some View {
@@ -166,13 +166,13 @@ struct DesktopWidgetPane: View {
                     }
                 }
             } label: {
-                Label("添加模块", systemImage: "plus")
+                Label(L("添加模块", "Add Module"), systemImage: "plus")
             }
             .menuStyle(.borderlessButton)
             .fixedSize()
             .disabled(availableModules.isEmpty)
-            .help(availableModules.isEmpty ? "所有模块均已添加到桌面小组件。" : "")
-            .accessibilityLabel("为桌面小组件添加模块")
+            .help(availableModules.isEmpty ? L("所有模块均已添加到桌面小组件。", "Every module is already in the desktop widget.") : "")
+            .accessibilityLabel(L("为桌面小组件添加模块", "Add a module to the desktop widget"))
 
             Spacer()
         }
@@ -203,7 +203,7 @@ struct DesktopWidgetPane: View {
     }
 
     private var savedPositionText: String {
-        guard let x = desktopWidget.originX, let y = desktopWidget.originY else { return "未设置" }
+        guard let x = desktopWidget.originX, let y = desktopWidget.originY else { return L("未设置", "Not set") }
         return "\(Int(x)), \(Int(y))"
     }
 }

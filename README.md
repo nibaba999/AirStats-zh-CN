@@ -8,14 +8,14 @@ AirStats 简体中文版是一款 Mac 菜单栏状态监测工具，基于 [AirS
 
 ### 版本与语言
 
-- **中文版：v1.6-zh.1**，本仓库发布的版本；主要面板和设置已汉化，部分提示、无障碍文字和第三方组件仍为英文。
-- **English: upstream AirStats 1.6**，英文原版请访问[上游项目](https://github.com/byrencheema/airstats)。本仓库目前没有独立的英文安装包，不能在中文版中切换回完整英文。
+- **中英文切换版：v1.6-zh.2**，本仓库发布的版本。可在“通用 → 语言”选择简体中文或 English；退出并重新打开后生效。中文仍有少量提示、无障碍文字和第三方组件为英文。
+- **英文原版：AirStats 1.6**，可访问[上游项目](https://github.com/byrencheema/airstats)下载；本仓库的中英文切换版属于非官方适配。
 - 本版本增加紧凑网速布局：在“菜单栏”设置里将“网络（上传与下载）”设为“文字”，即可上下两行显示下载和上传。
 - 刷新间隔可在“通用 → 更新间隔”中设置为 0.5、1、2、3、5、10 或 30 秒。
 
 ### 下载与安装
 
-前往 [Releases](https://github.com/nibaba999/AirStats-zh-CN/releases/tag/v1.6-zh.1) 下载 `AirStats-zh-CN-v1.6-zh.1-macOS-arm64.dmg`，打开后将 `AirStats.app` 拖到 `Applications` 文件夹。也可下载 ZIP，解压后安装。
+前往 [Releases](https://github.com/nibaba999/AirStats-zh-CN/releases/tag/v1.6-zh.2) 下载 `AirStats-zh-CN-v1.6-zh.2-macOS-arm64.dmg`，打开后将 `AirStats.app` 拖到 `Applications` 文件夹。也可下载 ZIP，解压后安装。
 
 **系统要求：**Apple 芯片 Mac、macOS 14 或更高版本。当前包未提供 Intel 版本。
 
@@ -47,14 +47,14 @@ AirStats Simplified Chinese Edition is an **unofficial adaptation** of [AirStats
 
 ### Editions and languages
 
-- **Chinese edition: v1.6-zh.1**, distributed from this repository. Main panels and settings are translated; some prompts, accessibility text and third-party components remain in English.
-- **English edition:** use the [upstream AirStats project](https://github.com/byrencheema/airstats). This repository does not provide a separate English installer or an in-app switch to a fully English interface.
+- **Bilingual edition: v1.6-zh.2**, distributed from this repository. Select Simplified Chinese or English in General → Language, then quit and reopen the app. Some prompts, accessibility text and third-party components remain in English in Chinese mode.
+- **Original English edition:** available from the [upstream AirStats project](https://github.com/byrencheema/airstats). This repository is an unofficial adaptation.
 - To show compact network rates on two lines, select **Text** for the combined upload/download readout in menu-bar settings. Download is on top; upload is below.
 - The sampling interval can be set to 0.5, 1, 2, 3, 5, 10 or 30 seconds in General settings.
 
 ### Download and install
 
-Download `AirStats-zh-CN-v1.6-zh.1-macOS-arm64.dmg` from [Releases](https://github.com/nibaba999/AirStats-zh-CN/releases/tag/v1.6-zh.1), open it and drag `AirStats.app` to Applications. A ZIP download is also available.
+Download `AirStats-zh-CN-v1.6-zh.2-macOS-arm64.dmg` from [Releases](https://github.com/nibaba999/AirStats-zh-CN/releases/tag/v1.6-zh.2), open it and drag `AirStats.app` to Applications. A ZIP download is also available.
 
 **Requirements:** Apple silicon and macOS 14 or later. An Intel build is not provided.
 

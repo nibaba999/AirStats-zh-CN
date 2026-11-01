@@ -16,7 +16,7 @@ struct AppearancePane: View {
     var body: some View {
         Form {
             Section {
-                Picker("主题", selection: settings.binding(\.general.appearance,
+                Picker(L("主题", "Theme"), selection: settings.binding(\.general.appearance,
                                                             onChange: applyAppearance)) {
                     ForEach(AppearanceMode.allCases, id: \.self) { mode in
                         Text(mode.label).tag(mode)
@@ -32,7 +32,7 @@ struct AppearancePane: View {
                 // how the whole app looks. Filed among the nine per-metric rows it
                 // read as a tenth metric called "所有指标", and its reach over the
                 // rows beneath it was something you had to discover by using it.
-                ColorRow(label: "所有指标",
+                ColorRow(label: L("所有指标", "All Metrics"),
                          symbol: "circle.hexagongrid.fill",
                          current: theme.uniformColor.map(Color.init(themeColor:))
                              ?? Design.Palette.primaryText,
@@ -44,13 +44,13 @@ struct AppearancePane: View {
                          // different colours and not only nine matching ones.
                          isOverridden: !theme.metrics.isEmpty,
                          status: allMetricsStatus,
-                         defaultTitle: "使用默认值",
+                         defaultTitle: L("使用默认值", "Use Defaults"),
                          set: { color in
                              settings.update { $0.theme.setAllColors(color) }
                          })
             } footer: {
-                SettingsFootnote("“所有指标”可同时设置下方的所有颜色。"
-                                 + "仍可单独修改每项指标。")
+                SettingsFootnote(L("“所有指标”可同时设置下方的所有颜色。", "All Metrics sets every colour below at once. ")
+                                 + L("仍可单独修改每项指标。", "Each metric can still be changed on its own."))
             }
 
             // A board rather than nine rows. One colour per metric is a palette, and a
@@ -69,24 +69,24 @@ struct AppearancePane: View {
                     ForEach(CollectorID.allCases, id: \.self) { id in colorChip(id) }
                 }
             } header: {
-                Text("指标颜色")
+                Text(L("指标颜色", "Metric Colours"))
             }
 
             Section {
-                Picker("图表样式", selection: settings.binding(\.charts.style)) {
+                Picker(L("图表样式", "Chart style"), selection: settings.binding(\.charts.style)) {
                     ForEach(ChartStyle.allCases, id: \.self) { style in
                         Text(style.label).tag(style)
                     }
                 }
-                Picker("历史记录保留时间", selection: settings.binding(\.charts.historyDuration)) {
+                Picker(L("历史记录保留时间", "Keep history for"), selection: settings.binding(\.charts.historyDuration)) {
                     ForEach(ChartSettings.allowedDurations, id: \.self) { duration in
                         Text(SettingsLabels.duration(duration)).tag(duration)
                     }
                 }
-                Toggle("在面板中显示 24 小时历史记录",
+                Toggle(L("在面板中显示 24 小时历史记录", "Show a 24-hour history in the panel"),
                        isOn: settings.binding(\.panel.showsHistoryChart))
             } header: {
-                Text("图表")
+                Text(L("图表", "Graph"))
             }
 
         }
@@ -108,9 +108,9 @@ struct AppearancePane: View {
             Spacer(minLength: Design.Space.s)
             SwatchButton(current: Design.Palette.metric(id),
                          isOverridden: theme.color(for: id) != nil,
-                         defaultTitle: "使用默认值",
+                         defaultTitle: L("使用默认值", "Use Defaults"),
                          label: "\(id.label) colour",
-                         value: theme.color(for: id) != nil ? "自定义" : "默认",
+                         value: theme.color(for: id) != nil ? L("自定义", "Custom") : L("默认", "Default"),
                          set: { color in
                              settings.update { $0.theme.setColor(color, for: id) }
                          })
@@ -121,7 +121,7 @@ struct AppearancePane: View {
     /// not the only answer here: nine rows can disagree, and calling that "自定义"
     /// would claim the swatch beside it is the colour they are all on.
     private var allMetricsStatus: String? {
-        theme.uniformColor == nil && !theme.metrics.isEmpty ? "混合" : nil
+        theme.uniformColor == nil && !theme.metrics.isEmpty ? L("混合", "Mixed") : nil
     }
 
     /// The theme is process state rather than a stored value, so the store alone would
@@ -155,7 +155,7 @@ private struct ColorRow: View {
     /// colour and can therefore be neither.
     var status: String?
     /// "使用默认值" for one metric, "使用默认值" for the row that sets them all.
-    var defaultTitle: String = "使用默认值"
+    var defaultTitle: String = L("使用默认值", "Use Defaults")
     let set: (ThemeColor?) -> Void
 
     var body: some View {
@@ -165,7 +165,7 @@ private struct ColorRow: View {
                          isOverridden: isOverridden,
                          defaultTitle: defaultTitle,
                          label: "\(label) colour",
-                         value: statusText ?? "默认",
+                         value: statusText ?? L("默认", "Default"),
                          set: set)
         } label: {
             HStack(spacing: Design.Space.s) {
@@ -184,7 +184,7 @@ private struct ColorRow: View {
         }
     }
 
-    private var statusText: String? { status ?? (isOverridden ? "自定义" : nil) }
+    private var statusText: String? { status ?? (isOverridden ? L("自定义", "Custom") : nil) }
 }
 
 /// The colour control itself: a swatch of what is drawn now, and a palette on click.
@@ -292,18 +292,18 @@ private struct ColorPalette: View {
     /// rather than as a list. Also the fill for a swatch standing in for nine
     /// disagreeing colours.
     static let presets: [(name: String, color: Color)] = [
-        ("红色", Color(nsColor: .systemRed)),
-        ("橙色", Color(nsColor: .systemOrange)),
-        ("黄色", Color(nsColor: .systemYellow)),
-        ("绿色", Color(nsColor: .systemGreen)),
-        ("薄荷绿", Color(nsColor: .systemMint)),
-        ("蓝绿色", Color(nsColor: .systemTeal)),
-        ("青色", Color(nsColor: .systemCyan)),
-        ("蓝色", Color(nsColor: .systemBlue)),
-        ("靛蓝", Color(nsColor: .systemIndigo)),
-        ("紫色", Color(nsColor: .systemPurple)),
-        ("粉色", Color(nsColor: .systemPink)),
-        ("灰色", Color(nsColor: .systemGray)),
+        (L("红色", "Red"), Color(nsColor: .systemRed)),
+        (L("橙色", "Orange"), Color(nsColor: .systemOrange)),
+        (L("黄色", "Yellow"), Color(nsColor: .systemYellow)),
+        (L("绿色", "Green"), Color(nsColor: .systemGreen)),
+        (L("薄荷绿", "Mint"), Color(nsColor: .systemMint)),
+        (L("蓝绿色", "Teal"), Color(nsColor: .systemTeal)),
+        (L("青色", "Cyan"), Color(nsColor: .systemCyan)),
+        (L("蓝色", "Blue"), Color(nsColor: .systemBlue)),
+        (L("靛蓝", "Indigo"), Color(nsColor: .systemIndigo)),
+        (L("紫色", "Purple"), Color(nsColor: .systemPurple)),
+        (L("粉色", "Pink"), Color(nsColor: .systemPink)),
+        (L("灰色", "Grey"), Color(nsColor: .systemGray)),
     ]
 
     static var spectrum: [Color] { presets.map(\.color) + [presets[0].color] }

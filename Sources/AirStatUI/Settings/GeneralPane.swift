@@ -10,73 +10,94 @@ struct GeneralPane: View {
     /// `LoginItem.synchronize` reports a real failure — a missing bundle, a
     /// revoked approval — and the toggle is worthless if that is swallowed.
     @State private var loginItemError: String?
+    @AppStorage(InterfaceLanguage.defaultsKey) private var interfaceLanguage = InterfaceLanguage.chinese.rawValue
+    @State private var languageRestartNotice = false
 
     var body: some View {
         Form {
             Section {
-                Toggle("登录时打开 AirStats",
+                Picker(L("语言", "Language"), selection: $interfaceLanguage) {
+                    Text("简体中文").tag(InterfaceLanguage.chinese.rawValue)
+                    Text("English").tag(InterfaceLanguage.english.rawValue)
+                }
+                .onChange(of: interfaceLanguage) { _, _ in languageRestartNotice = true }
+            } header: {
+                Text(L("语言 / Language", "Language / 语言"))
+            } footer: {
+                SettingsFootnote(L("切换后请退出并重新打开 AirStats，以更新界面语言。",
+                                   "Quit and reopen AirStats after changing the language."))
+            }
+
+            Section {
+                Toggle(L("登录时打开 AirStats", "Open AirStats at login"),
                        isOn: settings.binding(\.general.launchAtLogin, onChange: applyLoginItem))
                 if let loginItemError {
                     SettingsCaution(loginItemError)
                 }
-                Toggle("在程序坞中显示图标",
+                Toggle(L("在程序坞中显示图标", "Show icon in the Dock"),
                        isOn: settings.binding(\.general.showsDockIcon, onChange: applyDockIcon))
             } header: {
-                Text("启动")
+                Text(L("启动", "Startup"))
             }
 
             Section {
-                Picker("更新间隔", selection: settings.binding(\.general.updateInterval)) {
+                Picker(L("更新间隔", "Update interval"), selection: settings.binding(\.general.updateInterval)) {
                     ForEach(GeneralSettings.allowedIntervals, id: \.self) { interval in
                         Text(SettingsLabels.interval(interval)).tag(interval)
                     }
                 }
-                Toggle("菜单栏隐藏时降低更新频率",
+                Toggle(L("菜单栏隐藏时降低更新频率", "Slow down when the menu bar is hidden"),
                        isOn: settings.binding(\.general.throttlesWhenOccluded))
-                Toggle("低电量模式下暂停采样",
+                Toggle(L("低电量模式下暂停采样", "Pause sampling on Low Power Mode"),
                        isOn: settings.binding(\.general.pausesOnLowPower))
             } header: {
-                Text("采样")
+                Text(L("采样", "Sampling"))
             }
 
             Section {
-                Picker("温度", selection: settings.binding(\.general.temperatureUnit)) {
+                Picker(L("温度", "Temperature"), selection: settings.binding(\.general.temperatureUnit)) {
                     ForEach(TemperatureUnit.allCases, id: \.self) { unit in
                         Text(unit.label).tag(unit)
                     }
                 }
-                Picker("网络速率", selection: settings.binding(\.general.networkRateUnit)) {
+                Picker(L("网络速率", "Network rate"), selection: settings.binding(\.general.networkRateUnit)) {
                     ForEach(NetworkRateUnit.allCases, id: \.self) { unit in
                         Text(unit.label).tag(unit)
                     }
                 }
-                Picker("存储单位", selection: settings.binding(\.general.byteUnitStyle)) {
+                Picker(L("存储单位", "Storage sizes"), selection: settings.binding(\.general.byteUnitStyle)) {
                     ForEach(ByteUnitStyle.allCases, id: \.self) { style in
                         Text(style.label).tag(style)
                     }
                 }
-                Toggle("显示百分号", isOn: settings.binding(\.general.showsPercentSign))
+                Toggle(L("显示百分号", "Show the percent sign"), isOn: settings.binding(\.general.showsPercentSign))
             } header: {
-                Text("单位")
+                Text(L("单位", "Units"))
             }
 
             Section {
-                SettingsFootnote("中文适配版不使用上游自动更新，请查看本项目仓库获取更新。")
+                SettingsFootnote(L("中文适配版不使用上游自动更新，请查看本项目仓库获取更新。", "Automatic updates are disabled in this adaptation. Check the project repository for updates."))
             } header: {
-                Text("更新")
+                Text(L("更新", "Updates"))
             }
 
             Section {
-                Toggle("查询公网 IP 地址",
+                Toggle(L("查询公网 IP 地址", "Look up my public IP address"),
                        isOn: settings.binding(\.general.fetchesPublicIP))
             } header: {
-                Text("隐私")
+                Text(L("隐私", "Privacy"))
             } footer: {
-                SettingsFootnote("关闭后，网络模块只显示本地"
-                                 + "地址，AirStats 不会发起网络请求。")
+                SettingsFootnote(L("关闭后，网络模块只显示本地", "When off, the Network module shows local ")
+                                 + L("地址，AirStats 不会发起网络请求。", "addresses only and AirStats does not make a network request."))
             }
         }
         .settingsFormStyle()
+        .alert(L("请重新打开 AirStats", "Reopen AirStats"), isPresented: $languageRestartNotice) {
+            Button(L("知道了", "OK"), role: .cancel) {}
+        } message: {
+            Text(L("退出并重新打开后，将应用所选界面语言。",
+                   "Quit and reopen the app to apply the selected language."))
+        }
     }
 
     // MARK: Side effects
@@ -101,11 +122,11 @@ struct GeneralPane: View {
         if updater?.isChecking == true {
             HStack(spacing: Design.Space.s) {
                 ProgressView().controlSize(.small)
-                Text("正在检查…")
+                Text(L("正在检查…", "Checking…"))
             }
             .foregroundStyle(.secondary)
         } else if let failure = updater?.lastCheckFailure {
-            Text("无法检查")
+            Text(L("无法检查", "Couldn't check"))
                 .foregroundStyle(.secondary)
                 .help(failure)
                 .accessibilityValue(failure)
@@ -115,7 +136,7 @@ struct GeneralPane: View {
                     Text(pending.isReadyToInstall ? "AirStats \(pending.version) is ready"
                                                   : "AirStats \(pending.version) is available")
                 } else {
-                    Text("已是最新版本")
+                    Text(L("已是最新版本", "Up to date"))
                 }
                 if let checked = updater?.lastCheck {
                     Text("Checked \(Self.checkedPhrase(checked))")

@@ -205,7 +205,7 @@ struct ColorEditor: View {
         }
         .frame(height: Self.squareHeight)
         .accessibilityElement()
-        .accessibilityLabel("饱和度和亮度")
+        .accessibilityLabel(L("饱和度和亮度", "Saturation and brightness"))
         .accessibilityValue("\(percent(hsb.saturation)) saturation, "
                             + "\(percent(hsb.brightness)) brightness")
         .accessibilityAdjustableAction { direction in
@@ -303,7 +303,7 @@ struct ColorEditor: View {
                 // actually set rather than sitting there looking applied.
                 if !focused { commitHex() }
             }
-            .accessibilityLabel("十六进制颜色")
+            .accessibilityLabel(L("十六进制颜色", "Hex colour"))
     }
 
     private func commitHex() {
@@ -332,8 +332,8 @@ struct ColorEditor: View {
         }
         .buttonStyle(.plain)
         .foregroundStyle(Design.Palette.secondaryText)
-        .help("从屏幕任意位置选取颜色")
-        .accessibilityLabel("从屏幕选取颜色")
+        .help(L("从屏幕任意位置选取颜色", "Pick a colour from anywhere on screen"))
+        .accessibilityLabel(L("从屏幕选取颜色", "Pick a colour from the screen"))
     }
 
     private func percent(_ value: Double) -> String {

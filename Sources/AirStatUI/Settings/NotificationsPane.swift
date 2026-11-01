@@ -23,7 +23,7 @@ struct NotificationsPane: View {
     var body: some View {
         Form {
             Section {
-                Toggle("在以下情况下通知我",
+                Toggle(L("在以下情况下通知我", "Notify me about these conditions"),
                        isOn: settings.binding(\.notifications.isEnabled, onChange: askIfNeeded))
                 permissionNotice
             }
@@ -33,7 +33,7 @@ struct NotificationsPane: View {
                     ruleRows(rule)
                 }
             } header: {
-                Text("规则")
+                Text(L("规则", "Rules"))
             }
             .disabled(!isEnabled)
 
@@ -56,12 +56,12 @@ struct NotificationsPane: View {
             case .granted, .undetermined:
                 EmptyView()
             case .requesting:
-                SettingsFootnote("等待你在 macOS 权限提示中作出选择。")
+                SettingsFootnote(L("等待你在 macOS 权限提示中作出选择。", "Waiting for your answer to the macOS permission prompt."))
             case .unavailable:
                 VStack(alignment: .leading, spacing: Design.Space.s) {
-                    SettingsCaution("macOS 不允许 AirStats 发送通知，"
-                                    + "因此这些规则无法提醒你。")
-                    Button("打开通知设置…") { openSystemNotificationSettings() }
+                    SettingsCaution(L("macOS 不允许 AirStats 发送通知，", "macOS is not allowing AirStats to send notifications, ")
+                                    + L("因此这些规则无法提醒你。", "so these rules cannot alert you."))
+                    Button(L("打开通知设置…", "Open Notification Settings…")) { openSystemNotificationSettings() }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -73,7 +73,7 @@ struct NotificationsPane: View {
     /// the moment they said they want notifications.
     private func askIfNeeded(_ enabled: Bool) {
         guard enabled else { return }
-        authority?.request("当指标超过设定阈值时，AirStats 会提醒你。")
+        authority?.request(L("当指标超过设定阈值时，AirStats 会提醒你。", "AirStats alerts you when a metric crosses a threshold you set."))
     }
 
     private func openSystemNotificationSettings() {
@@ -116,12 +116,12 @@ struct NotificationsPane: View {
 
         if rule.isEnabled, unavailable == nil {
             VStack(alignment: .leading, spacing: Design.Space.m) {
-                Picker("持续达到指定时间后", selection: sustainedBinding(rule)) {
+                Picker(L("持续达到指定时间后", "Only after it holds for"), selection: sustainedBinding(rule)) {
                     ForEach(Self.sustainedOptions, id: \.self) { seconds in
                         Text(SettingsLabels.duration(seconds)).tag(seconds)
                     }
                 }
-                Picker("随后静默一段时间", selection: cooldownBinding(rule)) {
+                Picker(L("随后静默一段时间", "Then stay quiet for"), selection: cooldownBinding(rule)) {
                     ForEach(Self.cooldownOptions, id: \.self) { seconds in
                         Text(SettingsLabels.duration(seconds)).tag(seconds)
                     }

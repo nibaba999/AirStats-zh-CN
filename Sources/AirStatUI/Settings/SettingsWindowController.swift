@@ -254,7 +254,7 @@ struct SettingsRootView: View {
             }
             .padding(Design.Space.m)
         }
-        .accessibilityLabel("设置分类")
+        .accessibilityLabel(L("设置分类", "Settings sections"))
     }
 
     private var windowWidth: CGFloat { SettingsRootView.windowSize.width }

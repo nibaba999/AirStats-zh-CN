@@ -26,13 +26,13 @@ public enum SettingsTab: String, CaseIterable, Identifiable, Sendable {
 
     public var label: String {
         switch self {
-        case .general: return "通用"
-        case .menuBar: return "菜单栏"
-        case .appearance: return "外观"
-        case .desktopWidget: return "桌面小组件"
-        case .notifications: return "通知"
-        case .shortcuts: return "快捷键"
-        case .about: return "关于"
+        case .general: return L("通用", "General")
+        case .menuBar: return L("菜单栏", "Menu Bar")
+        case .appearance: return L("外观", "Appearance")
+        case .desktopWidget: return L("桌面小组件", "Desktop Widget")
+        case .notifications: return L("通知", "Notifications")
+        case .shortcuts: return L("快捷键", "Shortcuts")
+        case .about: return L("关于", "About")
         }
     }
 
@@ -161,27 +161,27 @@ struct MetricAvailability {
         case .cpuFrequency:
             // No public API reports Apple Silicon core frequency, so this readout
             // cannot work on any current Mac.
-            return "macOS 不提供 Apple 芯片的核心频率读数。"
+            return L("macOS 不提供 Apple 芯片的核心频率读数。", "macOS does not report core frequency on Apple Silicon.")
         case .cpuTemperature:
             guard let thermal = snapshot.thermal.value else { return nil }
             if thermal.cpuCelsius == nil {
-                return thermal.sensorsUnavailableReason ?? "无法读取 CPU 温度传感器。"
+                return thermal.sensorsUnavailableReason ?? L("无法读取 CPU 温度传感器。", "No readable CPU temperature sensor.")
             }
         case .fanSpeed:
             if let thermal = snapshot.thermal.value, thermal.fans.isEmpty {
-                return "此 Mac 没有风扇。"
+                return L("此 Mac 没有风扇。", "This Mac has no fans.")
             }
         case .battery, .batteryTime:
             if let power = snapshot.power.value, power.percentage == nil {
-                return "此 Mac 没有电池。"
+                return L("此 Mac 没有电池。", "This Mac has no battery.")
             }
         case .systemPower:
             if let power = snapshot.power.value, power.systemWatts == nil {
-                return "此 Mac 不提供系统功耗读数。"
+                return L("此 Mac 不提供系统功耗读数。", "This Mac does not report system power draw.")
             }
         case .gpuUsage:
             if let gpu = snapshot.gpu.value, gpu.primary?.utilization == nil {
-                return "此 Mac 无法读取 GPU 使用率。"
+                return L("此 Mac 无法读取 GPU 使用率。", "No GPU utilisation source on this Mac.")
             }
         default:
             return nil
@@ -289,13 +289,13 @@ struct UnavailableBadge: View {
     var body: some View {
         HStack(spacing: Design.Space.xs) {
             Image(systemName: "minus.circle")
-            Text("不可用")
+            Text(L("不可用", "Unavailable"))
         }
         .font(.callout)
         .foregroundStyle(Design.Palette.tertiaryText)
         .help(reason)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("此 Mac 不支持")
+        .accessibilityLabel(L("此 Mac 不支持", "Not available on this Mac"))
         .accessibilityValue(reason)
     }
 }
@@ -316,13 +316,13 @@ struct RestoreDefaultsButton: View {
     @State private var isConfirming = false
 
     var body: some View {
-        Button("恢复默认") { isConfirming = true }
+        Button(L("恢复默认", "Restore Defaults")) { isConfirming = true }
             .confirmationDialog("Restore \(title) settings to their defaults?",
                                 isPresented: $isConfirming) {
-                Button("恢复默认", role: .destructive) {
+                Button(L("恢复默认", "Restore Defaults"), role: .destructive) {
                     for section in sections { settings.resetSection(section) }
                 }
-                Button("取消", role: .cancel) {}
+                Button(L("取消", "Cancel"), role: .cancel) {}
             } message: {
                 Text("Only \(title) is affected. Other settings are left alone.")
             }
@@ -609,17 +609,17 @@ enum SettingsLabels {
 
     static func interval(_ seconds: TimeInterval) -> String {
         if seconds < 1 { return "\(Int(seconds * 1000)) ms" }
-        if seconds == 1 { return "1 秒" }
-        return "\(Int(seconds)) 秒"
+        if seconds == 1 { return L("1 秒", "1 second") }
+        return L("\(Int(seconds)) 秒", "\(Int(seconds)) seconds")
     }
 
     static func duration(_ seconds: TimeInterval) -> String {
-        if seconds <= 0 { return "立即" }
-        if seconds < 60 { return "\(Int(seconds)) 秒" }
+        if seconds <= 0 { return L("立即", "Immediately") }
+        if seconds < 60 { return L("\(Int(seconds)) 秒", "\(Int(seconds)) seconds") }
         let minutes = Int(seconds / 60)
-        if minutes < 60 { return minutes == 1 ? "1 分钟" : "\(minutes) 分钟" }
+        if minutes < 60 { return minutes == 1 ? L("1 分钟", "1 minute") : L("\(minutes) 分钟", "\(minutes) minutes") }
         let hours = Int(seconds / 3600)
-        return hours == 1 ? "1 小时" : "\(hours) 小时"
+        return hours == 1 ? L("1 小时", "1 hour") : L("\(hours) 小时", "\(hours) hours")
     }
 
     static func points(_ value: Double) -> String { "\(Int(value.rounded())) pt" }
@@ -695,7 +695,7 @@ struct MenuBarPreviewStrip: View {
         HStack(spacing: 0) {
             Spacer(minLength: Design.Space.xl)
             if isEmpty {
-                Text("没有启用的读数。")
+                Text(L("没有启用的读数。", "No readouts are enabled."))
                     .font(.callout)
                     .foregroundStyle(Design.Palette.secondaryText)
                     .lineLimit(1)
@@ -725,7 +725,7 @@ struct MenuBarPreviewStrip: View {
         .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: Design.Radius.card,
                                                                   style: .continuous))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("菜单栏预览")
+        .accessibilityLabel(L("菜单栏预览", "Menu bar preview"))
         .accessibilityValue(accessibilityValue)
     }
 
@@ -748,7 +748,7 @@ struct MenuBarPreviewStrip: View {
     }
 
     private var accessibilityValue: String {
-        if isEmpty { return "未启用读数" }
+        if isEmpty { return L("未启用读数", "No readouts enabled") }
         guard isTruncated else { return model.accessibilityDescription }
         return model.accessibilityDescription + ". Scroll the preview to see the rest"
     }

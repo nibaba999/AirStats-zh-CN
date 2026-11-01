@@ -43,25 +43,25 @@ struct AboutPane: View {
             Section {
                 MetricContent(systemState) { system in
                     Group {
-                        LabeledContent("电脑", value: system.computerName)
-                        LabeledContent("型号", value: system.modelName)
-                        LabeledContent("芯片", value: system.chipName)
-                        LabeledContent("核心数", value: coreText(system))
-                        LabeledContent("内存", value: formatter.memory(system.totalMemoryBytes))
-                        LabeledContent("系统", value: "\(system.osName) \(system.osVersion) (\(system.osBuild))")
-                        LabeledContent("运行时间", value: formatter.compactUptime(system.uptime))
+                        LabeledContent(L("电脑", "Computer"), value: system.computerName)
+                        LabeledContent(L("型号", "Model"), value: system.modelName)
+                        LabeledContent(L("芯片", "Chip"), value: system.chipName)
+                        LabeledContent(L("核心数", "Cores"), value: coreText(system))
+                        LabeledContent(L("内存", "Memory"), value: formatter.memory(system.totalMemoryBytes))
+                        LabeledContent(L("系统", "System"), value: "\(system.osName) \(system.osVersion) (\(system.osBuild))")
+                        LabeledContent(L("运行时间", "uptime"), value: formatter.compactUptime(system.uptime))
                     }
                 }
             } header: {
-                Text("本机")
+                Text(L("本机", "This Mac"))
             }
 
             Section {
                 HStack(spacing: Design.Space.l) {
-                    Button("导出…") { export() }
-                        .accessibilityHint("将设置写入 JSON 文件")
-                    Button("导入…") { importSettings() }
-                        .accessibilityHint("使用 JSON 文件替换设置")
+                    Button(L("导出…", "Export…")) { export() }
+                        .accessibilityHint(L("将设置写入 JSON 文件", "Writes your settings to a JSON file"))
+                    Button(L("导入…", "Import…")) { importSettings() }
+                        .accessibilityHint(L("使用 JSON 文件替换设置", "Replaces your settings from a JSON file"))
                     Spacer()
                 }
                 if let transferResult {
@@ -71,15 +71,15 @@ struct AboutPane: View {
                         SettingsFootnote(transferResult)
                     }
                 }
-                LabeledContent("位置", value: settings.settingsFileURL.path)
+                LabeledContent(L("位置", "Location"), value: settings.settingsFileURL.path)
                     .font(.callout)
                     .foregroundStyle(Design.Palette.secondaryText)
                     .textSelection(.enabled)
-                Button("在访达中显示") {
+                Button(L("在访达中显示", "Show in Finder")) {
                     NSWorkspace.shared.activateFileViewerSelecting([settings.settingsFileURL])
                 }
             } header: {
-                Text("设置文件")
+                Text(L("设置文件", "Settings File"))
             }
 
             // One section's defaults are restored from the bar under that section's
@@ -87,18 +87,18 @@ struct AboutPane: View {
             // only reset that reaches settings you are not looking at, so it is the
             // only one that belongs here.
             Section {
-                Button("恢复所有设置…", role: .destructive) { isConfirmingFullReset = true }
-                    .confirmationDialog("将所有设置恢复为默认值？",
+                Button(L("恢复所有设置…", "Restore All Settings…"), role: .destructive) { isConfirmingFullReset = true }
+                    .confirmationDialog(L("将所有设置恢复为默认值？", "Restore every setting to its defaults?"),
                                         isPresented: $isConfirmingFullReset) {
-                        Button("恢复所有设置", role: .destructive) {
+                        Button(L("恢复所有设置", "Restore All Settings"), role: .destructive) {
                             settings.resetToDefaults()
                         }
-                        Button("取消", role: .cancel) {}
+                        Button(L("取消", "Cancel"), role: .cancel) {}
                     } message: {
                         Text("Your menu bar readouts, desktop widget, colours, notification rules and shortcuts all go back to how AirStats shipped.")
                     }
             } header: {
-                Text("重置")
+                Text(L("重置", "Reset"))
             } footer: {
                 if let diagnostic = settings.loadDiagnostic {
                     SettingsCaution(diagnostic)
@@ -113,7 +113,7 @@ struct AboutPane: View {
     private var versionText: String {
         guard let short = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else {
             // Running the bare SwiftPM binary rather than the assembled .app.
-            return "开发版本"
+            return L("开发版本", "Development build")
         }
         return "Version \(short)"
     }

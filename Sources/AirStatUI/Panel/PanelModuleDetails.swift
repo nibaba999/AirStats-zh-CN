@@ -72,8 +72,8 @@ extension PanelModuleView {
             VStack(alignment: .leading, spacing: Design.Space.xs) {
                 coreClusters(cpu)
                 PanelDetailGrid(entries: [
-                    PanelDetailEntry("负载", loadAverage(cpu.loadAverage)),
-                    PanelDetailEntry("线程", formatter.count(cpu.threadCount)),
+                    PanelDetailEntry(L("负载", "Load"), loadAverage(cpu.loadAverage)),
+                    PanelDetailEntry(L("线程", "Threads"), formatter.count(cpu.threadCount)),
                 ])
                 history()
             }
@@ -121,16 +121,16 @@ extension PanelModuleView {
             let segments = Self.readableSegments(CompositionSegment.memory(memory))
             VStack(alignment: .leading, spacing: Design.Space.xs) {
                 StackedCompositionBar(segments, format: .memoryBytes,
-                                      title: "内存构成",
+                                      title: L("内存构成", "Memory composition"),
                                       barHeight: Design.Space.s, showsLegend: false)
                 PanelSegmentLegend(segments: segments, format: .memoryBytes)
-                PanelBarRow(label: "内存压力",
+                PanelBarRow(label: L("内存压力", "Memory Pressure"),
                             value: "\(memory.memoryPressure.label) · \(formatter.percent(memory.pressureFraction))",
                             fraction: memory.pressureFraction,
                             tint: PanelModuleView.barTint)
                 PanelDetailGrid(entries: [
-                    PanelDetailEntry("交换空间", formatter.memory(memory.swapUsedBytes)),
-                    PanelDetailEntry("总计", formatter.memory(memory.totalBytes)),
+                    PanelDetailEntry(L("交换空间", "Swap"), formatter.memory(memory.swapUsedBytes)),
+                    PanelDetailEntry(L("总计", "Total"), formatter.memory(memory.totalBytes)),
                 ])
                 memoryProcesses
                 history()
@@ -148,7 +148,7 @@ extension PanelModuleView {
                 .sorted { $0.memoryBytes > $1.memoryBytes }
                 .prefix(PanelSettings.processRowCount)
             VStack(alignment: .leading, spacing: 0) {
-                Text("占用最高的进程")
+                Text(L("占用最高的进程", "Top Processes"))
                     .font(Design.Text.label)
                     .foregroundStyle(Design.Palette.secondaryText)
                     .padding(.bottom, Design.Space.xxs)
@@ -202,7 +202,7 @@ extension PanelModuleView {
                     history(available: device.utilization != nil)
                 }
             } else {
-                UnavailableNote(.failed("未检测到图形设备"))
+                UnavailableNote(.failed(L("未检测到图形设备", "No graphics device reported")))
             }
         }
     }
@@ -230,13 +230,13 @@ extension PanelModuleView {
                     // Full width rather than a grid cell, the way the battery's adapter
                     // row is: a grid cell is half of 340pt and truncated "203.0.113…"
                     // after the label, and an IPv6 answer is three times longer again.
-                    ReadoutRow("公网 IP", publicIP)
+                    ReadoutRow(L("公网 IP", "Public IP"), publicIP)
                 }
                 if let wifi = network.wifi, let quality = wifi.signalQuality {
                     // The network's name labels its own signal bar; a row that said
                     // "信号" and a row that said "网络" would be two lines
                     // saying one thing.
-                    PanelBarRow(label: wifi.ssid ?? "信号", value: signalValue(wifi),
+                    PanelBarRow(label: wifi.ssid ?? L("信号", "Signal"), value: signalValue(wifi),
                                 fraction: quality, tint: tint)
                 }
                 history()
@@ -246,12 +246,12 @@ extension PanelModuleView {
 
     private func networkEntries(_ network: NetworkSnapshot) -> [PanelDetailEntry] {
         var entries = [
-            PanelDetailEntry("上传", formatter.networkRate(network.uploadBytesPerSecond)),
+            PanelDetailEntry(L("上传", "Upload"), formatter.networkRate(network.uploadBytesPerSecond)),
         ]
         if let ip = network.localIPv4 {
-            entries.append(PanelDetailEntry("本地 IP", ip))
+            entries.append(PanelDetailEntry(L("本地 IP", "Local IP"), ip))
         } else if let name = network.primaryInterfaceName {
-            entries.append(PanelDetailEntry("网络接口", name))
+            entries.append(PanelDetailEntry(L("网络接口", "Interface"), name))
         }
         return entries
     }
@@ -267,7 +267,7 @@ extension PanelModuleView {
         switch state {
         case .value(let address): return address
         case .failure(.unsupported): return nil
-        case .failure(.pending): return "正在查询…"
+        case .failure(.pending): return L("正在查询…", "Looking up…")
         case .failure: return MetricFormatter.unavailable
         }
     }
@@ -291,8 +291,8 @@ extension PanelModuleView {
                     volumeRow(volume)
                 }
                 PanelDetailGrid(entries: [
-                    PanelDetailEntry("读取", formatter.diskRate(disk.readBytesPerSecond)),
-                    PanelDetailEntry("写入", formatter.diskRate(disk.writeBytesPerSecond)),
+                    PanelDetailEntry(L("读取", "Read"), formatter.diskRate(disk.readBytesPerSecond)),
+                    PanelDetailEntry(L("写入", "Write"), formatter.diskRate(disk.writeBytesPerSecond)),
                 ])
                 history()
             }
@@ -345,7 +345,7 @@ extension PanelModuleView {
                     CapacityBar(fraction: percentage / 100, tint: PanelModuleView.barTint)
                 }
                 if let adapter = adapterSummary(power) {
-                    ReadoutRow("电源适配器", adapter)
+                    ReadoutRow(L("电源适配器", "Adapter"), adapter)
                 }
                 let entries = powerEntries(power)
                 if !entries.isEmpty { PanelDetailGrid(entries: entries) }
@@ -414,23 +414,23 @@ extension PanelModuleView {
         guard power.hasBattery else { return [] }
         var entries: [PanelDetailEntry] = []
         if power.isCharging, let toFull = power.timeToFull {
-            entries.append(PanelDetailEntry("充满还需", formatter.duration(toFull)))
+            entries.append(PanelDetailEntry(L("充满还需", "Full in"), formatter.duration(toFull)))
         } else if let toEmpty = power.timeToEmpty {
-            entries.append(PanelDetailEntry("剩余时间", formatter.duration(toEmpty)))
+            entries.append(PanelDetailEntry(L("剩余时间", "Time left"), formatter.duration(toEmpty)))
         } else if power.isFullyCharged {
-            entries.append(PanelDetailEntry("状态", "已充满"))
+            entries.append(PanelDetailEntry(L("状态", "State"), L("已充满", "Charged")))
         }
         if let health = power.healthPercent {
-            entries.append(PanelDetailEntry("健康度", formatter.percentValue(health)))
+            entries.append(PanelDetailEntry(L("健康度", "Health"), formatter.percentValue(health)))
         }
         if let cycles = power.cycleCount {
-            entries.append(PanelDetailEntry("循环次数", formatter.count(cycles)))
+            entries.append(PanelDetailEntry(L("循环次数", "Cycles"), formatter.count(cycles)))
         }
         if let condition = power.condition {
-            entries.append(PanelDetailEntry("状况", condition))
+            entries.append(PanelDetailEntry(L("状况", "Condition"), condition))
         }
         if power.isLowPowerMode {
-            entries.append(PanelDetailEntry("低电量模式", "On"))
+            entries.append(PanelDetailEntry(L("低电量模式", "Low Power"), "On"))
         }
         return entries
     }
@@ -450,7 +450,7 @@ extension PanelModuleView {
     }
 
     private func thermalEntries(_ thermal: ThermalSnapshot) -> [PanelDetailEntry] {
-        var entries = [PanelDetailEntry("内存压力", thermal.pressure.label)]
+        var entries = [PanelDetailEntry(L("内存压力", "Memory Pressure"), thermal.pressure.label)]
         if let gpu = thermal.gpuCelsius {
             entries.append(PanelDetailEntry("GPU", formatter.temperature(gpu)))
         }
@@ -554,9 +554,9 @@ extension PanelModuleView {
     private var systemDetail: some View {
         section(engine.system) { system in
             VStack(alignment: .leading, spacing: Design.Space.xxs) {
-                ReadoutRow("型号", system.modelName)
+                ReadoutRow(L("型号", "Model"), system.modelName)
                 PanelDetailGrid(entries: [
-                    PanelDetailEntry("芯片", system.chipName),
+                    PanelDetailEntry(L("芯片", "Chip"), system.chipName),
                     PanelDetailEntry(system.osName, system.osVersion),
                 ])
             }

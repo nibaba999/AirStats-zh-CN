@@ -86,9 +86,9 @@ struct ShortcutRecorderField: View {
                 .accessibilityLabel("\(action.label) shortcut")
                 .accessibilityValue(accessibleValue)
                 .accessibilityHint(isRecording
-                    ? "按下要设置的组合键，或按 Esc 取消"
-                    : "激活后按下组合键")
-                .help(isRecording ? "按下组合键，按 Esc 取消。" : "点击录制快捷键")
+                    ? L("按下要设置的组合键，或按 Esc 取消", "Press the key combination to assign, or press Escape to cancel")
+                    : L("激活后按下组合键", "Activate, then press a key combination"))
+                .help(isRecording ? L("按下组合键，按 Esc 取消。", "Press a key combination. Escape cancels.") : L("点击录制快捷键", "Click to record a shortcut"))
 
                 Button {
                     clear()
@@ -98,7 +98,7 @@ struct ShortcutRecorderField: View {
                 .buttonStyle(.borderless)
                 .foregroundStyle(Design.Palette.tertiaryText)
                 .disabled(shortcut == nil)
-                .help("移除此快捷键")
+                .help(L("移除此快捷键", "Remove this shortcut"))
                 .accessibilityLabel("Remove the \(action.label) shortcut")
             }
             if let rejection {
@@ -111,14 +111,14 @@ struct ShortcutRecorderField: View {
     }
 
     private var fieldTitle: String {
-        if isRecording { return "正在录制…" }
-        guard let shortcut else { return "录制快捷键" }
+        if isRecording { return L("正在录制…", "Recording…") }
+        guard let shortcut else { return L("录制快捷键", "Record Shortcut") }
         return ShortcutDisplay.string(for: shortcut)
     }
 
     private var accessibleValue: String {
-        if isRecording { return "正在录制" }
-        guard let shortcut else { return "无" }
+        if isRecording { return L("正在录制", "Recording") }
+        guard let shortcut else { return L("无", "None") }
         return ShortcutDisplay.accessibleString(for: shortcut)
     }
 
@@ -167,7 +167,7 @@ struct ShortcutRecorderField: View {
         guard !flags.intersection(significant).isEmpty else {
             // A bare key, or Shift plus a key, would fire while the user is typing
             // anywhere on the system.
-            rejection = "请包含 ⌘、⌃ 或 ⌥。"
+            rejection = L("请包含 ⌘、⌃ 或 ⌥。", "Include ⌘, ⌃ or ⌥.")
             return
         }
 

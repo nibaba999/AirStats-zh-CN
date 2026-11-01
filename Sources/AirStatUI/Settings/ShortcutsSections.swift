@@ -32,7 +32,7 @@ struct ShortcutsFormSections: View {
                         SettingsCaution(conflict)
                     }
                 } header: {
-                    Text("冲突")
+                    Text(L("冲突", "Conflicts"))
                 }
             }
         }

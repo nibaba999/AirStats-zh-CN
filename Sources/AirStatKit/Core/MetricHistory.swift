@@ -155,26 +155,26 @@ public enum SeriesKey: String, Sendable, Equatable, Hashable, CaseIterable, Coda
     public var label: String {
         switch self {
         case .cpuTotal: return "CPU"
-        case .cpuUser: return "用户"
-        case .cpuSystem: return "系统"
-        case .cpuPerformance: return "性能核心"
-        case .cpuEfficiency: return "能效核心"
-        case .memoryUsed: return "已用内存"
-        case .memoryPressure: return "内存压力"
-        case .memorySwap: return "交换空间"
+        case .cpuUser: return L("用户", "User")
+        case .cpuSystem: return L("系统", "System")
+        case .cpuPerformance: return L("性能核心", "P-Cores")
+        case .cpuEfficiency: return L("能效核心", "E-Cores")
+        case .memoryUsed: return L("已用内存", "Memory Used")
+        case .memoryPressure: return L("内存压力", "Memory Pressure")
+        case .memorySwap: return L("交换空间", "Swap")
         case .gpuUtilization: return "GPU"
         case .gpuVRAM: return "VRAM"
-        case .networkUpload: return "上传"
-        case .networkDownload: return "下载"
-        case .diskRead: return "读取"
-        case .diskWrite: return "写入"
-        case .diskUsed: return "已用磁盘"
-        case .batteryPercent: return "电池"
-        case .batteryWatts: return "电池功耗"
-        case .systemWatts: return "系统功耗"
-        case .cpuTemperature: return "CPU 温度"
-        case .gpuTemperature: return "GPU 温度"
-        case .fanRPM: return "风扇"
+        case .networkUpload: return L("上传", "Upload")
+        case .networkDownload: return L("下载", "Download")
+        case .diskRead: return L("读取", "Read")
+        case .diskWrite: return L("写入", "Write")
+        case .diskUsed: return L("已用磁盘", "Disk Used")
+        case .batteryPercent: return L("电池", "Battery")
+        case .batteryWatts: return L("电池功耗", "Battery Power")
+        case .systemWatts: return L("系统功耗", "System Power")
+        case .cpuTemperature: return L("CPU 温度", "CPU Temp")
+        case .gpuTemperature: return L("GPU 温度", "GPU Temp")
+        case .fanRPM: return L("风扇", "Fan")
         case .batteryPlugged: return "On Power"
         }
     }
