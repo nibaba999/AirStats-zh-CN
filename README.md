@@ -15,7 +15,7 @@ AirStats 简体中文版是一款 Mac 菜单栏状态监测工具，基于 [AirS
 
 ### 下载与安装
 
-前往 [Releases](https://github.com/nibaba999/AirStats-zh-CN/releases) 下载 `AirStats-zh-CN-v1.6-zh.1-macOS-arm64.zip`，解压后将 `AirStats.app` 拖入“应用程序”文件夹。
+前往 [Releases](https://github.com/nibaba999/AirStats-zh-CN/releases/tag/v1.6-zh.1) 下载 `AirStats-zh-CN-v1.6-zh.1-macOS-arm64.dmg`，打开后将 `AirStats.app` 拖到 `Applications` 文件夹。也可下载 ZIP，解压后安装。
 
 **系统要求：**Apple 芯片 Mac、macOS 14 或更高版本。当前包未提供 Intel 版本。
 
@@ -54,7 +54,7 @@ AirStats Simplified Chinese Edition is an **unofficial adaptation** of [AirStats
 
 ### Download and install
 
-Download `AirStats-zh-CN-v1.6-zh.1-macOS-arm64.zip` from [Releases](https://github.com/nibaba999/AirStats-zh-CN/releases), extract it and move `AirStats.app` to Applications.
+Download `AirStats-zh-CN-v1.6-zh.1-macOS-arm64.dmg` from [Releases](https://github.com/nibaba999/AirStats-zh-CN/releases/tag/v1.6-zh.1), open it and drag `AirStats.app` to Applications. A ZIP download is also available.
 
 **Requirements:** Apple silicon and macOS 14 or later. An Intel build is not provided.
 
