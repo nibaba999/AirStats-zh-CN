@@ -1,0 +1,81 @@
+#!/bin/bash
+# Builds AirStats and assembles a launchable .app bundle.
+#
+# SwiftPM cannot produce an app bundle, and a menu bar app needs one: LSUIElement,
+# a bundle identifier for UserDefaults and notifications, and a code signature so
+# macOS will grant it a status item. So we build the binary and wrap it here.
+#
+#   Scripts/build.sh            → debug build
+#   Scripts/build.sh release    → optimised build
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+CONFIG="${1:-debug}"
+
+swift build -c "$CONFIG" "${@:2}"
+
+BIN_DIR="$(swift build -c "$CONFIG" --show-bin-path)"
+APP="$BIN_DIR/AirStats.app"
+
+rm -rf "$APP"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Frameworks"
+
+cp "$BIN_DIR/AirStats" "$APP/Contents/MacOS/AirStats"
+
+# SwiftPM's swiftbuild backend (the default from Xcode 27) links with the deployment
+# target as the SDK version, so the binary claims it was built against macOS 14.
+# AppKit reads that claim to decide whether the app gets the current system design or
+# the compatibility look, so it is put back to the SDK the build actually used.
+MIN_OS="$(vtool -show-build "$APP/Contents/MacOS/AirStats" | awk '/minos/ { print $2 }')"
+SDK_VERSION="$(xcrun --sdk macosx --show-sdk-version)"
+vtool -set-build-version macos "$MIN_OS" "$SDK_VERSION" -replace \
+  -output "$APP/Contents/MacOS/AirStats" "$APP/Contents/MacOS/AirStats"
+cp Resources/Info.plist "$APP/Contents/Info.plist"
+printf 'APPL????' > "$APP/Contents/PkgInfo"
+
+if [ -f Resources/AppIcon.icns ]; then
+  cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
+fi
+
+# SwiftPM emits the UI target's resources as a bundle beside the binary. A signed app
+# may hold resources only under Contents/Resources: putting this beside Contents leaves
+# an unsealed object at the bundle root. Logo resolves this packaged location before it
+# falls back to SwiftPM's development accessor.
+#
+# Named exactly rather than globbed: a tree built under an earlier package name leaves
+# that name's bundle in the bin directory forever, and a glob ships both.
+BUNDLE="$BIN_DIR/AirStats_AirStatUI.bundle"
+if [ -d "$BUNDLE" ]; then
+  cp -R "$BUNDLE" "$APP/Contents/Resources/"
+else
+  echo "error: $BUNDLE is missing; the app would launch with no logo" >&2
+  exit 1
+fi
+
+# Sparkle is a framework, and the binary asks for it at @rpath. SwiftPM leaves a copy
+# beside the binary, which is why the bare `.build/debug/AirStats` runs; the bundle
+# needs its own, because the executable inside it resolves @rpath through
+# @executable_path/../Frameworks (see Package.swift).
+#
+# ditto rather than cp -R: a framework is a tree of symlinks into Versions/, and the
+# ones that go missing here are the ones codesign refuses to sign later.
+SPARKLE="$BIN_DIR/Sparkle.framework"
+if [ -d "$SPARKLE" ]; then
+  rm -rf "$APP/Contents/Frameworks/Sparkle.framework"
+  ditto "$SPARKLE" "$APP/Contents/Frameworks/Sparkle.framework"
+else
+  echo "error: $SPARKLE is missing; the app would not launch" >&2
+  exit 1
+fi
+
+# The upstream Sparkle framework is kept byte-for-byte intact. This adaptation does
+# not enable the updater, and changing its resources would invalidate its signature.
+# File-provider metadata copied onto a build product can prevent signing.
+xattr -cr "$APP" 2>/dev/null || true
+
+# Ad-hoc signature. Without any signature macOS refuses some window-server
+# privileges a status item needs.
+codesign --force --sign - --timestamp=none "$APP"
+codesign --verify --deep --strict "$APP"
+
+echo "$APP"
