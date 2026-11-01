@@ -1,95 +1,79 @@
-> **Unofficial Simplified Chinese adaptation** based on AirStats 1.6 by Byren Cheema. Some strings remain in English. Automatic updates are disabled in this fork. The upstream installation commands below install the original English release, not this adaptation. See [简体中文说明](README-zh-CN.md) and [LICENSE](LICENSE).
+# AirStats 简体中文版 / AirStats Simplified Chinese Edition
 
-<div align="center">
+[简体中文](#简体中文) | [English](#english) | [下载 / Downloads](https://github.com/nibaba999/AirStats-zh-CN/releases)
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.png">
-  <img src="docs/logo-light.png" alt="" width="104">
-</picture>
+## 简体中文
 
-<h3>AirStats</h3>
+AirStats 简体中文版是一款 Mac 菜单栏状态监测工具，基于 [AirStats](https://github.com/byrencheema/airstats) 1.6 修改。它可以显示 CPU、内存、网络、磁盘、电池等状态。本项目是**非官方汉化适配**，与原作者没有隶属关系。
 
-An ultra lightweight macOS system monitor.
+### 版本与语言
 
-<hr width="140">
+- **中文版：v1.6-zh.1**，本仓库发布的版本；主要面板和设置已汉化，部分提示、无障碍文字和第三方组件仍为英文。
+- **English: upstream AirStats 1.6**，英文原版请访问[上游项目](https://github.com/byrencheema/airstats)。本仓库目前没有独立的英文安装包，不能在中文版中切换回完整英文。
+- 本版本增加紧凑网速布局：在“菜单栏”设置里将“网络（上传与下载）”设为“文字”，即可上下两行显示下载和上传。
+- 刷新间隔可在“通用 → 更新间隔”中设置为 0.5、1、2、3、5、10 或 30 秒。
 
-</div>
+### 下载与安装
 
-AirStats is a system monitor for the Mac menu bar. It reads CPU, memory, GPU, network,
-disk, battery, temperature, process and host statistics from the kernel and shows them in
-three places: the menu bar itself, a panel that drops down when you click the status item,
-and a desktop widget you can leave on screen.
+前往 [Releases](https://github.com/nibaba999/AirStats-zh-CN/releases) 下载 `AirStats-zh-CN-v1.6-zh.1-macOS-arm64.zip`，解压后将 `AirStats.app` 拖入“应用程序”文件夹。
 
-It is built to be genuinely light. A menu bar monitor runs all day, every day, so AirStats
-holds a few megabytes and a fraction of a percent of one core rather than the tens of
-megabytes its peers take. It has no Dock icon, and reads the system through Mach, IOKit,
-sysctl and CoreWLAN.
+**系统要求：**Apple 芯片 Mac、macOS 14 或更高版本。当前包未提供 Intel 版本。
 
-## Requirements
+**签名说明：**本包仅使用临时签名，未使用 Apple Developer ID 签名，也未经过 Apple 公证。macOS 的 Gatekeeper 可能阻止打开或提示无法验证开发者；请勿将其误认为上游官方签名版本。首次运行的具体提示取决于系统安全设置。
 
-- macOS 14 or later
-- Apple silicon
+中文版使用独立的应用标识和设置目录，默认不开机启动，且关闭上游自动更新，避免英文版覆盖汉化。与官方版同名，安装时请留意“应用程序”目录中的替换提示。
 
-## Install
+### 从源码构建
 
-Download it from [airstats.app](https://airstats.app), open the dmg and drag the app to
-Applications. It is signed and notarized, so it opens with no warning.
+需要 Xcode 26 或更高版本及网络访问以获取 Swift Package 依赖：
 
-Or with Homebrew:
-
-```sh
-brew install --cask airstats
-```
-
-AirStats updates itself with [Sparkle](https://sparkle-project.org). It asks airstats.app
-once a week whether a newer version exists, and installs one only when you say so. Both of
-those can be turned off in General settings.
-
-## Build from source
-
-You need Xcode 26 or later: the app draws Liquid Glass, which needs the macOS 26 SDK.
-
-```sh
+```bash
+git clone https://github.com/nibaba999/AirStats-zh-CN.git
+cd AirStats-zh-CN
 Scripts/build.sh release
-cp -R .build/release/AirStats.app /Applications/
-open /Applications/AirStats.app
 ```
 
-`Scripts/build.sh` wraps the SwiftPM binary in a `.app` bundle, copies `Sparkle.framework`
-into `Contents/Frameworks`, and signs it ad hoc. macOS grants a status item only to a
-signed bundle with `LSUIElement` set. Run the script with no argument for a debug build.
+编译结果位于 `.build/release/AirStats.app`，使用临时签名。请勿使用上游项目的 Homebrew 安装命令下载本中文版：它安装的是英文原版。
 
-An ad-hoc signature is enough to run a build you made yourself, and not enough to travel:
-macOS refuses an ad-hoc bundle that arrived over the internet. `Scripts/release.sh` is what
-produces the download above, signing with a Developer ID certificate and stapling Apple's
-notarization ticket to the `.dmg`.
+### 许可与归属
 
-## Source layout
+本项目保留上游作者 Byren Cheema 的版权声明和 [MIT 许可证](LICENSE)，同时注明中文适配的版权。上游源码基于提交 `0609c85256c9d713d7333b90ea345cbf3560dff7`；第三方依赖 Sparkle 使用其自身的许可。原项目的名称和图标仅用于标识本适配的来源，不代表官方背书。上游原始说明保留在 [README.upstream.md](README.upstream.md)。
 
-| Path | What lives there |
-| --- | --- |
-| `Sources/AirStatKit` | Collectors, the sampling engine, settings, formatting. No UI. |
-| `Sources/AirStatUI` | Menu bar drawing, panel, desktop widget, settings window, charts, design system. |
-| `Sources/AirStats` | The executable, app delegate, and the probe and render commands. |
-| `Tests/AirStatKitTests` | Contract tests for the collectors, plus settings and formatting. |
-| `Scripts/build.sh` | Builds the binary and assembles the `.app`. |
-| `Scripts/release.sh` | Signs, notarizes and packages the `.dmg` that ships. |
-| `Scripts/appcast.py` | Writes a release into the appcast Sparkle reads. |
-| `Scripts/benchmark.py` | Samples the menu bar monitors on your Mac over one shared window. |
+---
 
-`AirStatKit` never imports SwiftUI or AppKit, which is what lets the tests and the probe
-run in a windowless process.
+## English
 
-## Contributing
+AirStats Simplified Chinese Edition is an **unofficial adaptation** of [AirStats](https://github.com/byrencheema/airstats) 1.6 by Byren Cheema. It monitors CPU, memory, network traffic, disk, battery and other metrics from the macOS menu bar.
 
-[CONTRIBUTING.md](CONTRIBUTING.md) has the checks to run before a pull request and the
-house rules.
+### Editions and languages
 
-## Contact
+- **Chinese edition: v1.6-zh.1**, distributed from this repository. Main panels and settings are translated; some prompts, accessibility text and third-party components remain in English.
+- **English edition:** use the [upstream AirStats project](https://github.com/byrencheema/airstats). This repository does not provide a separate English installer or an in-app switch to a fully English interface.
+- To show compact network rates on two lines, select **Text** for the combined upload/download readout in menu-bar settings. Download is on top; upload is below.
+- The sampling interval can be set to 0.5, 1, 2, 3, 5, 10 or 30 seconds in General settings.
 
-Bugs and feature requests go on the [issue tracker](https://github.com/byrencheema/airstats/issues).
-For anything private, email [hello@airstats.app](mailto:hello@airstats.app).
+### Download and install
 
-## License
+Download `AirStats-zh-CN-v1.6-zh.1-macOS-arm64.zip` from [Releases](https://github.com/nibaba999/AirStats-zh-CN/releases), extract it and move `AirStats.app` to Applications.
 
-MIT. See [LICENSE](LICENSE).
+**Requirements:** Apple silicon and macOS 14 or later. An Intel build is not provided.
+
+**Signing:** This build is ad-hoc signed, not signed with Apple Developer ID and not notarized by Apple. macOS Gatekeeper may block it or report that the developer cannot be verified. It is not the officially signed upstream release.
+
+The adaptation has a separate bundle identifier and settings directory, does not launch at login by default, and disables upstream automatic updates. Its app bundle has the same filename as the upstream app, so review any replacement prompt during installation.
+
+### Build from source
+
+Xcode 26 or later and network access to Swift Package dependencies are required:
+
+```bash
+git clone https://github.com/nibaba999/AirStats-zh-CN.git
+cd AirStats-zh-CN
+Scripts/build.sh release
+```
+
+The ad-hoc signed result is `.build/release/AirStats.app`. The upstream Homebrew installation command installs the original English application, not this adaptation.
+
+### License and attribution
+
+The [MIT license](LICENSE) retains the upstream copyright notice for Byren Cheema and credits the Chinese adaptation. Upstream base commit: `0609c85256c9d713d7333b90ea345cbf3560dff7`. The Sparkle dependency has its own license. Upstream names and icons identify the source and do not imply endorsement. The original upstream documentation is retained in [README.upstream.md](README.upstream.md).
