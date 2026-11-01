@@ -37,7 +37,7 @@ Scripts/build.sh release
 
 ### 许可与归属
 
-本项目保留上游作者 Byren Cheema 的版权声明和 [MIT 许可证](LICENSE)，同时注明中文适配的版权。上游源码基于提交 `0609c85256c9d713d7333b90ea345cbf3560dff7`；第三方依赖 Sparkle 使用其自身的许可。原项目的名称和图标仅用于标识本适配的来源，不代表官方背书。上游原始说明保留在 [README.upstream.md](README.upstream.md)。
+本项目保留上游作者 Byren Cheema 的版权声明和 [MIT 许可证](LICENSE)，同时注明中文适配的版权。上游源码基于提交 `0609c85256c9d713d7333b90ea345cbf3560dff7`；第三方依赖 Sparkle 及其组成部分的许可与版权声明见 [Sparkle 许可证](THIRD_PARTY_LICENSES/Sparkle-LICENSE.txt)。原项目的名称和图标仅用于标识本适配的来源，不代表官方背书。上游原始说明保留在 [README.upstream.md](README.upstream.md)。
 
 ---
 
@@ -76,4 +76,4 @@ The ad-hoc signed result is `.build/release/AirStats.app`. The upstream Homebrew
 
 ### License and attribution
 
-The [MIT license](LICENSE) retains the upstream copyright notice for Byren Cheema and credits the Chinese adaptation. Upstream base commit: `0609c85256c9d713d7333b90ea345cbf3560dff7`. The Sparkle dependency has its own license. Upstream names and icons identify the source and do not imply endorsement. The original upstream documentation is retained in [README.upstream.md](README.upstream.md).
+The [MIT license](LICENSE) retains the upstream copyright notice for Byren Cheema and credits the Chinese adaptation. Upstream base commit: `0609c85256c9d713d7333b90ea345cbf3560dff7`. The copyright and license notices for Sparkle and its components are included in [the Sparkle license](THIRD_PARTY_LICENSES/Sparkle-LICENSE.txt). Upstream names and icons identify the source and do not imply endorsement. The original upstream documentation is retained in [README.upstream.md](README.upstream.md).
