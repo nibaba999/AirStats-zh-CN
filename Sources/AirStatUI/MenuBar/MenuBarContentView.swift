@@ -107,6 +107,8 @@ public final class MenuBarContentView: NSView {
         /// three of them sit in less room than one stacked number. The height is not
         /// here because it comes off the caption font: see `barHeight`.
         static let barWidth: CGFloat = 9
+        static let usageRingDiameter: CGFloat = 12
+        static let usageRingStroke: CGFloat = 1.8
         /// Between one stacked caption letter and the next, cap-height box to cap-height
         /// box. Two rather than one because round letters overshoot their cap height at
         /// both ends, and a one-point gap between a P and a U was a P touching a U.
@@ -234,6 +236,8 @@ public final class MenuBarContentView: NSView {
         var battery: CGFloat = 0
         var caption: CGFloat = 0
         var bar: CGFloat = 0
+        var primaryRing: CGFloat = 0
+        var secondaryRing: CGFloat = 0
         var statusDot: CGFloat = 0
         var graph: CGFloat = 0
         var primaryGlyph: CGFloat = 0
@@ -260,6 +264,7 @@ public final class MenuBarContentView: NSView {
             append(battery, after: Layout.partGap)
             append(caption, after: Layout.partGap)
             append(bar, after: Layout.partGap)
+            append(primaryRing, after: Layout.partGap)
             append(statusDot, after: Layout.partGap)
             append(graph, after: Layout.partGap)
             append(stack, after: Layout.partGap)
@@ -267,7 +272,9 @@ public final class MenuBarContentView: NSView {
             append(primaryGlyph, after: Layout.partGap)
             append(primaryValue, after: primaryGlyph > 0 ? Layout.glyphGap : Layout.partGap)
             append(secondaryGlyph, after: Layout.pairGap)
-            append(secondaryValue, after: secondaryGlyph > 0 ? Layout.glyphGap : Layout.pairGap)
+            append(secondaryRing, after: Layout.pairGap)
+            append(secondaryValue, after: secondaryGlyph > 0 || secondaryRing > 0
+                   ? Layout.glyphGap : Layout.pairGap)
             return total
         }
     }
@@ -283,7 +290,7 @@ public final class MenuBarContentView: NSView {
     }
 
     private func isCompactNetwork(_ item: MenuBarItemRender) -> Bool {
-        item.style == .text && !item.isUnavailable
+        item.style == .compactNetwork && !item.isUnavailable
             && item.primary.glyph == "↓" && item.secondary?.glyph == "↑"
     }
 
@@ -332,6 +339,16 @@ public final class MenuBarContentView: NSView {
             geometry.bar = Layout.barWidth
             if let caption = item.caption {
                 geometry.bar += sideLabelWidth(caption) + Layout.glyphGap
+            }
+            return geometry
+        }
+
+        if item.style == .ring || item.style == .ringSplit {
+            geometry.primaryRing = item.level == nil ? 0 : Layout.usageRingDiameter
+            geometry.primaryValue = reservedWidth(item.primary, model: model)
+            if item.style == .ringSplit, item.secondary != nil {
+                geometry.secondaryRing = Layout.usageRingDiameter
+                geometry.secondaryValue = reservedWidth(item.secondary!, model: model)
             }
             return geometry
         }
@@ -475,6 +492,12 @@ public final class MenuBarContentView: NSView {
             x += geometry.bar
         }
 
+        if geometry.primaryRing > 0 {
+            gap(Layout.partGap)
+            drawUsageRing(item.level, alert: item.isAlert, x: x, colors: colors, context: context)
+            x += geometry.primaryRing
+        }
+
         if geometry.statusDot > 0 {
             gap(Layout.partGap)
             drawStatusDot(item, x: x, colors: colors, scale: scale, context: context)
@@ -519,6 +542,12 @@ public final class MenuBarContentView: NSView {
 
         if let secondary = item.secondary, geometry.secondaryValue > 0 {
             gap(Layout.pairGap)
+            if geometry.secondaryRing > 0 {
+                let window = item.aiWindows.dropFirst().first
+                drawUsageRing(window?.fraction, alert: window?.isAlert ?? false,
+                              x: x, colors: colors, context: context)
+                x += geometry.secondaryRing + Layout.glyphGap
+            }
             if geometry.secondaryGlyph > 0, let glyph = secondary.glyph {
                 drawText(glyph, role: .value, x: x, baseline: baseline,
                          color: colors.glyph, scale: scale, context: context)
@@ -539,6 +568,31 @@ public final class MenuBarContentView: NSView {
         let textWidth = width(text, role: .value)
         drawText(text, role: .value, x: x + reserved - textWidth, baseline: baseline,
                  color: color, scale: scale, context: context)
+    }
+
+    private func drawUsageRing(_ fraction: Double?, alert: Bool, x: CGFloat,
+                               colors: ItemColors, context: CGContext) {
+        let diameter = Layout.usageRingDiameter
+        let radius = (diameter - Layout.usageRingStroke) / 2
+        let center = CGPoint(x: x + diameter / 2, y: bounds.midY)
+        context.saveGState()
+        context.setLineWidth(Layout.usageRingStroke)
+        context.setLineCap(.round)
+        context.setStrokeColor(NSColor.labelColor.withAlphaComponent(0.24).cgColor)
+        context.addEllipse(in: CGRect(x: center.x - radius, y: center.y - radius,
+                                      width: radius * 2, height: radius * 2))
+        context.strokePath()
+        if let fraction {
+            let value = min(max(fraction, 0), 1)
+            if value > 0 {
+                context.setStrokeColor(alert ? NSColor.systemRed.cgColor : colors.value)
+                context.beginPath()
+                context.addArc(center: center, radius: radius, startAngle: .pi / 2,
+                               endAngle: .pi / 2 - CGFloat(value) * 2 * .pi, clockwise: true)
+                context.strokePath()
+            }
+        }
+        context.restoreGState()
     }
 
     /// Baseline that centres a line's cap-height box on the item's midline. Cap height
@@ -683,6 +737,9 @@ public final class MenuBarContentView: NSView {
         private func override(for item: MenuBarItemRender) -> NSColor? {
             if item.isUnavailable {
                 return base.withAlphaComponent(base.alphaComponent * Layout.unavailableAlpha)
+            }
+            if item.isAlert {
+                return NSColor.systemRed.withAlphaComponent(base.alphaComponent)
             }
             // The menu bar is a monochrome surface and stays one by default. A colour
             // appears here only because the user went and chose one for this metric,
@@ -1275,7 +1332,7 @@ private extension MenuBarDisplayStyle {
     /// Whether this style draws a formatted number.
     var drawsValue: Bool {
         switch self {
-        case .text, .textAndGraph, .iconAndText: return true
+        case .text, .textAndGraph, .iconAndText, .compactNetwork, .ring, .ringSplit: return true
         case .graph, .battery, .statusDot, .bar: return false
         }
     }

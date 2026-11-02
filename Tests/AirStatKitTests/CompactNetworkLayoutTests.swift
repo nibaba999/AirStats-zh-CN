@@ -22,7 +22,7 @@ struct CompactNetworkLayoutTests {
 
     @Test("two-line text is narrower than the existing horizontal icon layout")
     func compactIsNarrower() {
-        let compact = model(down: 2_400_000, up: 340_000, style: .text)
+        let compact = model(down: 2_400_000, up: 340_000, style: .compactNetwork)
         let original = model(down: 2_400_000, up: 340_000, style: .iconAndText)
         #expect(compact.items[0].primary.glyph == "↓")
         #expect(compact.items[0].secondary?.glyph == "↑")
@@ -31,8 +31,8 @@ struct CompactNetworkLayoutTests {
 
     @Test("width remains stable as traffic rates change")
     func widthDoesNotJump() {
-        let idle = model(down: 0, up: 0, style: .text)
-        let busy = model(down: 99_000_000, up: 9_000_000, style: .text)
+        let idle = model(down: 0, up: 0, style: .compactNetwork)
+        let busy = model(down: 99_000_000, up: 9_000_000, style: .compactNetwork)
         #expect(width(idle) == width(busy))
     }
 
@@ -43,7 +43,7 @@ struct CompactNetworkLayoutTests {
             ?? FileManager.default.temporaryDirectory.appendingPathComponent("AirStatsCompact-\(UUID())")
         defer { if override == nil { try? FileManager.default.removeItem(at: directory) } }
         var settings = Settings()
-        settings.menuBar.items = [MenuBarItemConfig(metric: .networkThroughput, style: .text)]
+        settings.menuBar.items = [MenuBarItemConfig(metric: .networkThroughput, style: .compactNetwork)]
         for isDark in [false, true] {
             for scale: CGFloat in [1, 2] {
                 let request = OffscreenRenderer.Request(surface: .menuBar, isDark: isDark,

@@ -179,10 +179,12 @@ struct PanelUpdateRow: View {
     /// A staged update wants a relaunch and nothing else, so the row says so instead
     /// of promising an install it has already done.
     private var headline: String {
-        update.isReadyToInstall ? "AirStats \(update.version) is ready" : "AirStats \(update.version) is available"
+        update.isReadyToInstall
+            ? L("AirStats \(update.version) 已可安装", "AirStats \(update.version) is ready")
+            : L("AirStats \(update.version) 已推出", "AirStats \(update.version) is available")
     }
 
-    private var action: String { update.isReadyToInstall ? L("重新启动", "Restart") : "Install" }
+    private var action: String { update.isReadyToInstall ? L("重新启动", "Restart") : L("安装", "Install") }
 
     @State private var isHovering = false
 
@@ -212,8 +214,9 @@ struct PanelUpdateRow: View {
             }
         }
         .accessibilityLabel(headline)
-        .accessibilityHint(update.isReadyToInstall ? "Relaunches AirStats into the new version"
-                                                   : "Opens the updater to install it")
+        .accessibilityHint(update.isReadyToInstall
+                           ? L("重新启动 AirStats 并使用新版本", "Relaunches AirStats into the new version")
+                           : L("打开更新程序以安装此版本", "Opens the updater to install it"))
     }
 }
 

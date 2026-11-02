@@ -133,8 +133,8 @@ struct DesktopWidgetPane: View {
                         RowIconButton(systemName: "trash",
                                       help: desktopWidget.modules.count <= 1
                                           ? L("桌面小组件至少需要一个模块。", "The desktop widget needs at least one module.")
-                                          : "Remove \(module.label) from the desktop widget",
-                                      label: "Remove \(module.label)") {
+                                          : L("从桌面小组件移除\(module.label)", "Remove \(module.label) from the desktop widget"),
+                                      label: L("移除\(module.label)", "Remove \(module.label)")) {
                             settings.update { $0.desktopWidget.modules.removeAll { $0 == module } }
                         }
                         .disabled(desktopWidget.modules.count <= 1)

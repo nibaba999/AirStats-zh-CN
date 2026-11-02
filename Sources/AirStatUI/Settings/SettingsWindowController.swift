@@ -9,6 +9,7 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
     private let engine: MetricsEngine
     private let settings: SettingsStore
     private let updater: SoftwareUpdater?
+    private let makeAIUsagePane: (@MainActor () -> AnyView)?
     /// Shared with the threshold monitor, so the notifications pane reports the same
     /// grant the alerts actually depend on rather than a second opinion.
     private let authority: NotificationAuthority?
@@ -16,16 +17,22 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
 
     public init(engine: MetricsEngine, settings: SettingsStore,
                 updater: SoftwareUpdater? = nil,
-                authority: NotificationAuthority? = nil) {
+                authority: NotificationAuthority? = nil,
+                makeAIUsagePane: (@MainActor () -> AnyView)? = nil) {
         self.engine = engine
         self.settings = settings
         self.updater = updater
         self.authority = authority
+        self.makeAIUsagePane = makeAIUsagePane
         super.init()
     }
 
-    public func show() {
-        let window = self.window ?? makeWindow()
+    public func show(tab: SettingsTab? = nil) {
+        if tab != nil, let current = window, current.isVisible {
+            self.window = nil
+            current.close()
+        }
+        let window = self.window ?? makeWindow(initialTab: tab)
         self.window = window
         // Two preferences are process state rather than stored values, so they take
         // effect only when something applies them. Doing it here means opening
@@ -48,12 +55,20 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
         window = nil
     }
 
-    private func makeWindow() -> NSWindow {
+    private func makeWindow(initialTab: SettingsTab? = nil) -> NSWindow {
         let window = NSWindow()
         let root = SettingsRootView(settings: settings, engine: engine,
                                     updater: updater,
-                                    authority: authority) { [weak window] tab in
+                                    authority: authority,
+                                    makeAIUsagePane: makeAIUsagePane,
+                                    initialTab: initialTab) { [weak window] tab in
             window?.title = tab.label
+            window?.setContentSize(SettingsRootView.windowSize(for: tab))
+            if tab == .aiUsage {
+                window?.styleMask.insert(.resizable)
+            } else {
+                window?.styleMask.remove(.resizable)
+            }
         }
         window.delegate = self
         window.title = "AirStats Settings"
@@ -80,7 +95,7 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
         window.contentView = glassWindowBackdrop(around: NSHostingView(rootView: root),
                                                  cornerRadius: Design.Radius.panel)
 
-        window.setContentSize(SettingsRootView.windowSize)
+        window.setContentSize(SettingsRootView.windowSize(for: SettingsTab.renderDefault))
         window.setFrameAutosaveName("AirStatsSettingsWindow")
         return window
     }
@@ -104,6 +119,7 @@ struct SettingsRootView: View {
     let updater: SoftwareUpdater?
     /// Nil for the same reason: `UNUserNotificationCenter` traps outside an app bundle.
     let authority: NotificationAuthority?
+    let makeAIUsagePane: (@MainActor () -> AnyView)?
     /// Lets the window title follow the selected pane, which is what System
     /// Settings does and what `navigationTitle` used to give us for free.
     var onPaneChange: ((SettingsTab) -> Void)?
@@ -116,6 +132,11 @@ struct SettingsRootView: View {
     /// Taller than the 560 it was: the content view now runs under the titlebar, and
     /// the strip the traffic lights sit in is height the panes used to have.
     static let windowSize = NSSize(width: 760, height: 588)
+    static let aiUsageWindowSize = NSSize(width: 1040, height: 700)
+
+    static func windowSize(for tab: SettingsTab) -> NSSize {
+        tab == .aiUsage ? aiUsageWindowSize : windowSize
+    }
 
     /// Clearance for the traffic lights, which float over the content now that the
     /// titlebar draws nothing. Content starts below it rather than scrolling under it:
@@ -124,11 +145,13 @@ struct SettingsRootView: View {
 
     init(settings: SettingsStore, engine: MetricsEngine? = nil, updater: SoftwareUpdater? = nil,
          authority: NotificationAuthority? = nil,
+         makeAIUsagePane: (@MainActor () -> AnyView)? = nil,
          initialTab: SettingsTab? = nil, onPaneChange: ((SettingsTab) -> Void)? = nil) {
         self.settings = settings
         self.engine = engine
         self.updater = updater
         self.authority = authority
+        self.makeAIUsagePane = makeAIUsagePane
         self.onPaneChange = onPaneChange
         _tab = State(initialValue: initialTab ?? SettingsTab.renderDefault)
     }
@@ -257,8 +280,8 @@ struct SettingsRootView: View {
         .accessibilityLabel(L("设置分类", "Settings sections"))
     }
 
-    private var windowWidth: CGFloat { SettingsRootView.windowSize.width }
-    private var windowHeight: CGFloat { SettingsRootView.windowSize.height }
+    private var windowWidth: CGFloat { SettingsRootView.windowSize(for: tab).width }
+    private var windowHeight: CGFloat { SettingsRootView.windowSize(for: tab).height }
     private static let sidebarWidth: CGFloat = 184
 
     @ViewBuilder
@@ -271,6 +294,13 @@ struct SettingsRootView: View {
         case .notifications: NotificationsPane(settings: settings, engine: engine,
                                                authority: authority)
         case .shortcuts: ShortcutsPane(settings: settings)
+        case .aiUsage:
+            if let makeAIUsagePane {
+                makeAIUsagePane()
+            } else {
+                ContentUnavailableView(L("AI 额度监控未启动", "AI usage monitoring is unavailable"),
+                                       systemImage: "sparkles.rectangle.stack")
+            }
         case .about: AboutPane(settings: settings, engine: engine, updater: updater)
         }
     }

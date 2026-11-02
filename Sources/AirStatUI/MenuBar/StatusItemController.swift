@@ -47,6 +47,7 @@ public final class StatusItemController {
     public var onPrimaryAction: (() -> Void)?
     public var onSecondaryAction: (() -> Void)?
     public var onVisibilityChange: ((Bool) -> Void)?
+    private var aiUsageSummary: AIUsageMenuBarSummary?
 
     private let engine: MetricsEngine
     private let settings: SettingsStore
@@ -77,6 +78,13 @@ public final class StatusItemController {
     public func install() {
         syncLayout()
         beginRendering()
+        render()
+    }
+
+    /// Replaces Pulse's reading and redraws the existing AirStats menu-bar items.
+    public func updateAIUsage(_ summary: AIUsageMenuBarSummary?) {
+        guard aiUsageSummary != summary else { return }
+        aiUsageSummary = summary
         render()
     }
 
@@ -249,7 +257,8 @@ public final class StatusItemController {
         let model = MenuBarRenderModel(snapshot: engine.snapshot,
                                        history: engine.history,
                                        settings: settings.settings,
-                                       isStale: engine.isStale)
+                                       isStale: engine.isStale,
+                                       aiUsage: aiUsageSummary)
         for entry in hosted {
             let slice = StatusItemController.slice(model, readout: entry.readout)
             guard entry.content.update(with: slice) else { continue }

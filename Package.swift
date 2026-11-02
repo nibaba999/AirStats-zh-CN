@@ -3,9 +3,11 @@ import PackageDescription
 
 let package = Package(
     name: "AirStats",
+    defaultLocalization: "en",
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "AirStats", targets: ["AirStats"]),
+        .library(name: "Pulse", targets: ["Pulse"]),
         .library(name: "AirStatKit", targets: ["AirStatKit"]),
         .library(name: "AirStatUI", targets: ["AirStatUI"]),
     ],
@@ -31,9 +33,17 @@ let package = Package(
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
+        .target(
+            name: "Pulse",
+            dependencies: ["AirStatKit", .product(name: "Sparkle", package: "Sparkle")],
+            path: "Sources/PulseEmbedded",
+            resources: [.process("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
         .executableTarget(
             name: "AirStats",
-            dependencies: ["AirStatKit", "AirStatUI", .product(name: "Sparkle", package: "Sparkle")],
+            dependencies: ["AirStatKit", "AirStatUI", "Pulse",
+                           .product(name: "Sparkle", package: "Sparkle")],
             swiftSettings: [.swiftLanguageMode(.v5)],
             // Sparkle ships as a framework, and Scripts/build.sh puts it in
             // Contents/Frameworks. Without this the binary looks only where SwiftPM
@@ -41,6 +51,13 @@ let package = Package(
             linkerSettings: [
                 .unsafeFlags(["-Xlinker", "-rpath", "-Xlinker", "@executable_path/../Frameworks"])
             ]
+        ),
+        .testTarget(
+            name: "PulseEmbeddedTests",
+            dependencies: ["Pulse"],
+            path: "Tests/PulseEmbeddedTests",
+            resources: [.copy("Fixtures")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         // Named for AirStatKit because that is where almost everything under test
         // lives, but it also links AirStatUI: the pieces of UI logic worth testing

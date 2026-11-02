@@ -37,7 +37,18 @@ struct AboutPane: View {
                 }
                 .padding(.vertical, Design.Space.xs)
                 .accessibilityElement(children: .combine)
-                .accessibilityLabel("AirStats, \(versionText)")
+                .accessibilityLabel("AirStats，\(versionText)")
+            }
+
+            Section {
+                Text(L("本项目是基于 AirStats 的非官方中文适配。应用源码按组成部分采用 MIT 与 Apache-2.0 等许可，第三方许可和完整说明请查看项目页。",
+                       "This is an unofficial Chinese adaptation of AirStats. Source components use MIT, Apache-2.0 and other licenses; see the project page for notices and details."))
+                    .font(.callout)
+                    .foregroundStyle(Design.Palette.secondaryText)
+                Link(L("开源项目与许可说明", "Open source project and licenses"),
+                     destination: URL(string: "https://github.com/nibaba999/AirStats-zh-CN")!)
+            } header: {
+                Text(L("开源与归属", "Open Source and Attribution"))
             }
 
             Section {
@@ -95,7 +106,8 @@ struct AboutPane: View {
                         }
                         Button(L("取消", "Cancel"), role: .cancel) {}
                     } message: {
-                        Text("Your menu bar readouts, desktop widget, colours, notification rules and shortcuts all go back to how AirStats shipped.")
+                        Text(L("菜单栏读数、桌面小组件、颜色、通知规则和快捷键都将恢复为 AirStats 的初始设置。",
+                               "Your menu bar readouts, desktop widget, colours, notification rules and shortcuts all go back to how AirStats shipped."))
                     }
             } header: {
                 Text(L("重置", "Reset"))
@@ -115,13 +127,14 @@ struct AboutPane: View {
             // Running the bare SwiftPM binary rather than the assembled .app.
             return L("开发版本", "Development build")
         }
-        return "Version \(short)"
+        return L("版本 \(short)", "Version \(short)")
     }
 
     private func coreText(_ system: SystemInfoSnapshot) -> String {
         var text = "\(system.logicalCores)"
         if system.performanceCores > 0 || system.efficiencyCores > 0 {
-            text += " (\(system.performanceCores) performance, \(system.efficiencyCores) efficiency)"
+            text += L("（\(system.performanceCores) 个性能核心，\(system.efficiencyCores) 个能效核心）",
+                      " (\(system.performanceCores) performance, \(system.efficiencyCores) efficiency)")
         }
         if let gpu = system.gpuCoreCount {
             text += " · \(gpu) GPU"
@@ -140,10 +153,10 @@ struct AboutPane: View {
         do {
             try settings.exportJSON().write(to: url, options: .atomic)
             transferFailed = false
-            transferResult = "Exported to \(url.lastPathComponent)."
+            transferResult = L("已导出到 \(url.lastPathComponent)。", "Exported to \(url.lastPathComponent).")
         } catch {
             transferFailed = true
-            transferResult = "Could not export: \(error.localizedDescription)"
+            transferResult = L("导出失败：\(error.localizedDescription)", "Could not export: \(error.localizedDescription)")
         }
     }
 
@@ -155,10 +168,11 @@ struct AboutPane: View {
         do {
             try settings.importJSON(Data(contentsOf: url))
             transferFailed = false
-            transferResult = "Imported from \(url.lastPathComponent)."
+            transferResult = L("已从 \(url.lastPathComponent) 导入。", "Imported from \(url.lastPathComponent).")
         } catch {
             transferFailed = true
-            transferResult = "\(url.lastPathComponent) is not a settings file AirStats can read. Your settings are unchanged."
+            transferResult = L("\(url.lastPathComponent) 不是 AirStats 可读取的设置文件；当前设置未更改。",
+                               "\(url.lastPathComponent) is not a settings file AirStats can read. Your settings are unchanged.")
         }
     }
 }

@@ -14,9 +14,9 @@ struct StatusDotAvailabilityTests {
         }
     }
 
-    @Test("it is on offer, not the default: a new readout still lands on text")
+    @Test("the compact network style is the default, while status dots are optional")
     func throughputStillDefaultsToText() {
-        #expect(MenuBarMetric.networkThroughput.supportedStyles.first == .text)
+        #expect(MenuBarMetric.networkThroughput.supportedStyles.first == .compactNetwork)
     }
 
     @Test("a metric that cannot draw it is clamped off it")

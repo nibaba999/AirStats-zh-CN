@@ -274,7 +274,7 @@ struct ColorEditor: View {
         // never clipped at either end of the hue.
         .frame(height: Self.hueKnob)
         .accessibilityElement()
-        .accessibilityLabel("Hue")
+        .accessibilityLabel(L("色相", "Hue"))
         .accessibilityValue("\(Int((hsb.hue * 360).rounded())) degrees")
         .accessibilityAdjustableAction { direction in
             hsb.hue = ((hsb.hue + (direction == .increment ? 1 : -1) / 36) + 1)
@@ -291,7 +291,7 @@ struct ColorEditor: View {
     /// design file, the thing they matched their wallpaper to. Applied on commit
     /// rather than per keystroke, since "#F" is a valid prefix and a terrible colour.
     private var hexField: some View {
-        TextField("Hex", text: $hexText)
+        TextField(L("十六进制", "Hex"), text: $hexText)
             .textFieldStyle(.roundedBorder)
             .font(.callout.monospaced())
             .frame(width: 92)

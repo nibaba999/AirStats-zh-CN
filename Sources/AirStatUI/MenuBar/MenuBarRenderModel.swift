@@ -80,6 +80,9 @@ public struct MenuBarItemRender: Equatable, Sendable {
     /// are a fraction of a known ceiling, and carried for the reason the battery
     /// charge is: the view draws what it is handed.
     public var level: Double?
+    /// Pulse marks a reading red after its configured warning threshold.
+    public var isAlert: Bool
+    public var aiWindows: [AIUsageMenuBarSummary.Window]
 
     /// Two lights, download over upload.
     public struct NetworkStatus: Equatable, Sendable {
@@ -123,7 +126,9 @@ public struct MenuBarItemRender: Equatable, Sendable {
                 isBatteryLow: Bool = false,
                 batteryValueText: String? = nil,
                 networkStatus: NetworkStatus? = nil,
-                level: Double? = nil) {
+                level: Double? = nil,
+                isAlert: Bool = false,
+                aiWindows: [AIUsageMenuBarSummary.Window] = []) {
         self.id = id
         self.style = style
         self.tint = tint
@@ -139,6 +144,8 @@ public struct MenuBarItemRender: Equatable, Sendable {
         self.batteryValueText = batteryValueText
         self.networkStatus = networkStatus
         self.level = level
+        self.isAlert = isAlert
+        self.aiWindows = aiWindows
     }
 
 }
@@ -158,7 +165,8 @@ public struct MenuBarRenderModel: Equatable, Sendable {
     public init(snapshot: SystemSnapshot,
                 history: MetricHistory,
                 settings: Settings,
-                isStale: Bool) {
+                isStale: Bool,
+                aiUsage: AIUsageMenuBarSummary? = nil) {
         let formatter = MetricFormatter(settings: settings.general)
         self.spacing = MenuBarSettings.itemSpacing
         self.usesMonospacedDigits = MenuBarSettings.usesMonospacedDigits
@@ -172,7 +180,8 @@ public struct MenuBarRenderModel: Equatable, Sendable {
                                                       snapshot: snapshot,
                                                       history: history,
                                                       formatter: formatter,
-                                                      settings: settings))
+                                                      settings: settings,
+                                                      aiUsage: aiUsage))
         }
         self.items = rendered
     }
@@ -184,10 +193,11 @@ public struct MenuBarRenderModel: Equatable, Sendable {
                                snapshot: SystemSnapshot,
                                history: MetricHistory,
                                formatter: MetricFormatter,
-                               settings: Settings) -> MenuBarItemRender {
+                               settings: Settings,
+                               aiUsage: AIUsageMenuBarSummary?) -> MenuBarItemRender {
         let metric = config.metric
         let dash = MetricFormatter.unavailable
-        let widest = formatter.widestSample(for: metric)
+        var widest = metric == .aiUsage ? (aiUsage?.widestText ?? "100%") : formatter.widestSample(for: metric)
 
         var valueText = dash
         var seriesKey: SeriesKey?
@@ -203,8 +213,29 @@ public struct MenuBarRenderModel: Equatable, Sendable {
         var battery: BatteryState?
         // Set only by the fraction metrics, whose bar style draws the value as a fill.
         var level: Double?
+        var isAlert = false
+        var aiWindows: [AIUsageMenuBarSummary.Window] = []
 
         switch metric {
+        case .aiUsage:
+            if let aiUsage {
+                valueText = aiUsage.valueText
+                unavailable = false
+                accessibilityValue = aiUsage.accessibilityLabel
+                level = aiUsage.fraction
+                isAlert = aiUsage.isAlert
+                aiWindows = aiUsage.windows
+                if config.style == .ringSplit, let first = aiWindows.first {
+                    valueText = "\(first.label) \(first.valueText)"
+                    widest = "周 100%"
+                    level = first.fraction
+                    isAlert = first.isAlert
+                    if let second = aiWindows.dropFirst().first {
+                        secondary = MenuBarLine(valueText: "\(second.label) \(second.valueText)",
+                                                widestText: "周 100%")
+                    }
+                }
+            }
         case .cpuUsage:
             if let cpu = snapshot.cpu.value {
                 let busy = cpu.total.busy
@@ -255,19 +286,18 @@ public struct MenuBarRenderModel: Equatable, Sendable {
             seriesKey = .gpuUtilization
 
         case .networkThroughput:
-            // Compact form ("2.4MB") rather than the full one ("2.4 MB/s"). Two full
-            // rates side by side are 130 points of menu bar for one readout; the arrow
-            // already says this is a flow, and the panel and the accessibility label
-            // both still carry the units in full.
-            let rateWidest = MenuBarRenderModel.widestCompactNetworkRate(formatter)
+            let isCompact = config.style == .compactNetwork
+            let rateWidest = isCompact
+                ? MenuBarRenderModel.widestCompactNetworkRate(formatter)
+                : formatter.widestSample(for: .networkThroughput)
             var uploadText = dash
             // The two lights, for the `.statusDot` style. Up means a primary
             // interface with a route out, the same test the panel's connection row
             // uses, and a direction is lit while it is moving or was within the hold.
             var networkStatus: MenuBarItemRender.NetworkStatus?
             if let net = snapshot.network.value {
-                valueText = formatter.networkRate(net.downloadBytesPerSecond, compact: true)
-                uploadText = formatter.networkRate(net.uploadBytesPerSecond, compact: true)
+                valueText = formatter.networkRate(net.downloadBytesPerSecond, compact: isCompact)
+                uploadText = formatter.networkRate(net.uploadBytesPerSecond, compact: isCompact)
                 unavailable = false
                 accessibilityValue = "Network down \(formatter.networkRate(net.downloadBytesPerSecond)), "
                     + "up \(formatter.networkRate(net.uploadBytesPerSecond))"
@@ -397,10 +427,11 @@ public struct MenuBarRenderModel: Equatable, Sendable {
         return finish(config: config, caption: caption(for: config),
                       primary: MenuBarLine(valueText: valueText, widestText: widest,
                                            series: series),
-                      secondary: nil,
+                      secondary: secondary,
                       unavailable: unavailable, accessibility: accessibilityValue,
                       settings: settings, battery: battery,
-                      level: level.map { min(max($0, 0), 1) })
+                      level: level.map { min(max($0, 0), 1) },
+                      isAlert: isAlert, aiWindows: aiWindows)
     }
 
     /// What the battery indicator draws, gathered in one place so the three fields can
@@ -421,7 +452,9 @@ public struct MenuBarRenderModel: Equatable, Sendable {
                                settings: Settings,
                                battery: BatteryState? = nil,
                                networkStatus: MenuBarItemRender.NetworkStatus? = nil,
-                               level: Double? = nil) -> MenuBarItemRender {
+                               level: Double? = nil,
+                               isAlert: Bool = false,
+                               aiWindows: [AIUsageMenuBarSummary.Window] = []) -> MenuBarItemRender {
         MenuBarItemRender(
             id: config.id,
             style: config.style,
@@ -441,7 +474,9 @@ public struct MenuBarRenderModel: Equatable, Sendable {
             isBatteryLow: battery?.isLow ?? false,
             batteryValueText: battery?.valueText,
             networkStatus: networkStatus,
-            level: level
+            level: level,
+            isAlert: isAlert,
+            aiWindows: aiWindows
         )
     }
 
@@ -487,6 +522,7 @@ public struct MenuBarRenderModel: Equatable, Sendable {
         case .systemPower: return "PWR"
         case .fanSpeed: return "FAN"
         case .uptime: return "UP"
+        case .aiUsage: return "AI"
         }
     }
 
@@ -585,6 +621,7 @@ public struct MenuBarRenderModel: Equatable, Sendable {
         case .systemPower: return "bolt"
         case .fanSpeed: return "fan"
         case .uptime: return "clock"
+        case .aiUsage: return "sparkles"
         }
     }
 }

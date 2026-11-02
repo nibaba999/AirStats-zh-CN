@@ -22,7 +22,7 @@ struct GeneralPane: View {
                 }
                 .onChange(of: interfaceLanguage) { _, _ in languageRestartNotice = true }
             } header: {
-                Text(L("语言 / Language", "Language / 语言"))
+                Text(L("界面语言", "Interface Language"))
             } footer: {
                 SettingsFootnote(L("切换后请退出并重新打开 AirStats，以更新界面语言。",
                                    "Quit and reopen AirStats after changing the language."))
@@ -90,6 +90,7 @@ struct GeneralPane: View {
                 SettingsFootnote(L("关闭后，网络模块只显示本地", "When off, the Network module shows local ")
                                  + L("地址，AirStats 不会发起网络请求。", "addresses only and AirStats does not make a network request."))
             }
+
         }
         .settingsFormStyle()
         .alert(L("请重新打开 AirStats", "Reopen AirStats"), isPresented: $languageRestartNotice) {
@@ -133,13 +134,14 @@ struct GeneralPane: View {
         } else if updater?.pending != nil || updater?.lastCheck != nil {
             VStack(alignment: .trailing, spacing: Design.Space.xxs) {
                 if let pending = updater?.pending {
-                    Text(pending.isReadyToInstall ? "AirStats \(pending.version) is ready"
-                                                  : "AirStats \(pending.version) is available")
+                    Text(pending.isReadyToInstall
+                         ? L("AirStats \(pending.version) 已可安装", "AirStats \(pending.version) is ready")
+                         : L("AirStats \(pending.version) 已推出", "AirStats \(pending.version) is available"))
                 } else {
                     Text(L("已是最新版本", "Up to date"))
                 }
                 if let checked = updater?.lastCheck {
-                    Text("Checked \(Self.checkedPhrase(checked))")
+                    Text(L("检查时间：\(Self.checkedPhrase(checked))", "Checked \(Self.checkedPhrase(checked))"))
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                 }
@@ -154,7 +156,7 @@ struct GeneralPane: View {
     /// drawn against, and the formatter reads that as "in 0 seconds".
     private static func checkedPhrase(_ checked: Date) -> String {
         let now = Date()
-        guard now.timeIntervalSince(checked) >= 60 else { return "just now" }
+        guard now.timeIntervalSince(checked) >= 60 else { return L("刚刚", "just now") }
         return relative.localizedString(for: checked, relativeTo: now)
     }
 
@@ -175,7 +177,8 @@ struct GeneralPane: View {
 
     private func applyLoginItem(_ enabled: Bool) {
         if let error = LoginItem.synchronize(enabled: enabled) {
-            loginItemError = "macOS refused to \(enabled ? "register" : "remove") the login item: \(error.localizedDescription)"
+            loginItemError = L("macOS 拒绝\(enabled ? "添加" : "移除")登录项：\(error.localizedDescription)",
+                               "macOS refused to \(enabled ? "register" : "remove") the login item: \(error.localizedDescription)")
             // The stored preference must not claim something the system rejected.
             settings.update { $0.general.launchAtLogin = LoginItem.isEnabled }
         } else {

@@ -50,7 +50,26 @@ public final class SettingsStore {
         self.backupURL = dir.appendingPathComponent("settings.backup.json")
         self.saveDebounce = saveDebounce
         let (loaded, diagnostic) = SettingsStore.load(from: fileURL, backup: backupURL)
-        self.settings = loaded
+        var migrated = loaded
+        if migrated.schemaVersion < Settings.currentSchemaVersion {
+            // Add the embedded AI readout once to older configurations. Bumping the
+            // schema records that migration, so a later user removal stays removed.
+            if !migrated.menuBar.items.contains(where: { $0.metric == .aiUsage }) {
+                migrated.menuBar.items.append(MenuBarItemConfig(metric: .aiUsage,
+                                                                style: .ring,
+                                                                isEnabled: true,
+                                                                showsCaption: false))
+            }
+            // Before ring styles existed, iconAndText was the shipped AI default.
+            // Move that untouched default to the new compact ring; custom text stays.
+            if migrated.schemaVersion < 3,
+               let index = migrated.menuBar.items.firstIndex(where: { $0.metric == .aiUsage }),
+               migrated.menuBar.items[index].style == .iconAndText {
+                migrated.menuBar.items[index].style = .ring
+            }
+            migrated.schemaVersion = Settings.currentSchemaVersion
+        }
+        self.settings = migrated
         self.loadDiagnostic = diagnostic
         // `didSet` does not fire during initialisation, so the first paint would use
         // the shipped palette and only pick up the user's colours on their next edit.
@@ -63,7 +82,13 @@ public final class SettingsStore {
     public nonisolated static var defaultDirectory: URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support")
-        let dir = base.appendingPathComponent("AirStats-zh-CN", isDirectory: true)
+        // Preserve the installed AirStats data directory while giving parallel
+        // builds (such as the Pulse integration demo) isolated settings.
+        let bundleID = Bundle.main.bundleIdentifier
+        let folderName = bundleID == "com.nibaba999.AirStats.zhCN"
+            ? "AirStats-zh-CN"
+            : (bundleID ?? "AirStats-zh-CN")
+        let dir = base.appendingPathComponent(folderName, isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir
     }

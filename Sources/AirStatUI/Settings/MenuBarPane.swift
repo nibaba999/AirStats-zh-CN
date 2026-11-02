@@ -94,12 +94,12 @@ struct MenuBarPane: View {
                 .disabled(isLastEnabled(item))
                 .help(isLastEnabled(item)
                       ? L("至少保留一项读数，以便点击菜单栏项目。", "At least one readout must stay visible so the menu bar item remains clickable.")
-                      : "Show \(item.metric.label) in the menu bar")
-                .accessibilityLabel("Show \(item.metric.label)")
+                      : L("在菜单栏显示\(item.metric.label)", "Show \(item.metric.label) in the menu bar"))
+                .accessibilityLabel(L("显示\(item.metric.label)", "Show \(item.metric.label)"))
 
             RowMenu(title: item.metric.label,
                     width: Self.metricColumn,
-                    label: "\(item.metric.label) metric") {
+                    label: L("\(item.metric.label)指标", "\(item.metric.label) metric")) {
                 Picker(L("指标", "Metric"), selection: metricBinding(for: item)) {
                     ForEach(MenuBarMetric.allCases, id: \.self) { metric in
                         Text(metric.label).tag(metric)
@@ -133,15 +133,15 @@ struct MenuBarPane: View {
             RowIconButton(systemName: "trash",
                           help: items.count <= 1
                               ? L("不能移除最后一项读数。", "The last readout cannot be removed.")
-                              : "Remove \(item.metric.label) from the menu bar",
-                          label: "Remove \(item.metric.label)") {
+                              : L("从菜单栏移除\(item.metric.label)", "Remove \(item.metric.label) from the menu bar"),
+                          label: L("移除\(item.metric.label)", "Remove \(item.metric.label)")) {
                 remove(item)
             }
             .disabled(items.count <= 1)
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(item.metric.label)
-        .accessibilityValue("\(item.isEnabled ? L("显示", "shown") : L("隐藏", "hidden")), \(item.style.label)")
+        .accessibilityValue("\(item.isEnabled ? L("显示", "shown") : L("隐藏", "hidden")), \(item.style.label(for: item.metric))")
     }
 
     /// The style popup, carrying the caption toggle with it.
@@ -150,11 +150,11 @@ struct MenuBarPane: View {
     /// so it belongs behind the same control rather than as a second checkbox
     /// competing with the one that means "shown".
     private func styleMenu(_ item: MenuBarItemConfig) -> some View {
-        RowMenu(title: item.style.label,
-                label: "\(item.metric.label) display style") {
+        RowMenu(title: item.style.label(for: item.metric),
+                label: L("\(item.metric.label)显示方式", "\(item.metric.label) display style")) {
             Picker(L("显示方式", "Display as"), selection: styleBinding(for: item)) {
                 ForEach(item.metric.supportedStyles, id: \.self) { style in
-                    Text(style.label).tag(style)
+                    Text(style.label(for: item.metric)).tag(style)
                 }
             }
             .pickerStyle(.inline)

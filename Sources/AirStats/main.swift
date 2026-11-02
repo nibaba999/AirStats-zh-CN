@@ -1,10 +1,12 @@
 import AppKit
+import Pulse
 
 // Command-line modes short-circuit before any UI exists, so `--probe` works over
 // SSH and in CI where there is no window server.
 if DiagnosticsCLI.runIfRequested() {
     exit(0)
 }
+PulseCommandLine.runIfRequested()
 
 // Menu bar accessory: no Dock icon, no app menu. Set before `run()` so the app
 // never flashes a Dock tile on launch.

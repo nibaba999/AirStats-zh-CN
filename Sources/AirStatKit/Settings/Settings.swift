@@ -27,6 +27,7 @@ public enum TemperatureUnit: String, Sendable, Codable, CaseIterable, Equatable,
         case .fahrenheit: return L("华氏度（°F）", "Fahrenheit (°F)")
         }
     }
+
     public var suffix: String {
         switch self {
         case .celsius: return "°C"
@@ -88,6 +89,7 @@ public enum MenuBarMetric: String, Sendable, Codable, CaseIterable, Equatable, H
     case battery, batteryTime, systemPower
     case fanSpeed
     case uptime
+    case aiUsage
 
     public var label: String {
         switch self {
@@ -106,7 +108,8 @@ public enum MenuBarMetric: String, Sendable, Codable, CaseIterable, Equatable, H
         case .batteryTime: return L("电池剩余时间", "Battery Time Remaining")
         case .systemPower: return L("系统功耗", "System Power")
         case .fanSpeed: return L("风扇转速", "Fan Speed")
-        case .uptime: return L("运行时间", "uptime")
+        case .uptime: return L("运行时间", "Uptime")
+        case .aiUsage: return L("AI 额度", "AI Usage")
         }
     }
 
@@ -120,7 +123,7 @@ public enum MenuBarMetric: String, Sendable, Codable, CaseIterable, Equatable, H
         case .networkThroughput, .networkUpload, .networkDownload: return .network
         case .diskActivity, .diskFree: return .disk
         case .battery, .batteryTime, .systemPower: return .power
-        case .uptime: return .system
+        case .uptime, .aiUsage: return .system
         }
     }
 
@@ -134,14 +137,15 @@ public enum MenuBarMetric: String, Sendable, Codable, CaseIterable, Equatable, H
         switch self {
         case .uptime, .batteryTime, .cpuFrequency, .diskFree:
             return [.text, .iconAndText]
+        case .aiUsage:
+            return [.ring, .ringSplit, .iconAndText, .text]
         case .battery:
             // The only metric the system's own indicator can draw, and the one it
             // should draw by default, so it leads the list.
             return [.battery] + MenuBarDisplayStyle.general
         case .networkThroughput:
-            // The one readout that is already two directions, so it is the one the
-            // two lights can stand in for.
-            return MenuBarDisplayStyle.general + [.statusDot]
+            // Network is the one paired readout with a purpose-built narrow layout.
+            return [.compactNetwork] + MenuBarDisplayStyle.general + [.statusDot]
         case .cpuUsage, .gpuUsage, .memoryUsage, .memoryPressure:
             // The readouts that are a fraction of a known ceiling, which is the only
             // thing a fill level can honestly draw.
@@ -160,6 +164,9 @@ public enum MenuBarMetric: String, Sendable, Codable, CaseIterable, Equatable, H
 /// lights for the up-and-down network readout, and a fill level for the readouts that
 /// are a fraction of a known ceiling.
 public enum MenuBarDisplayStyle: String, Sendable, Codable, CaseIterable, Equatable, Hashable {
+    case compactNetwork
+    case ring
+    case ringSplit
     case text
     case graph
     case textAndGraph
@@ -174,6 +181,9 @@ public enum MenuBarDisplayStyle: String, Sendable, Codable, CaseIterable, Equata
 
     public var label: String {
         switch self {
+        case .compactNetwork: return L("紧凑上下两行", "Compact, stacked")
+        case .ring: return L("圆环和百分比", "Ring & Percentage")
+        case .ringSplit: return L("多时段圆环", "Multi-window Rings")
         case .text: return L("文字", "Text")
         case .graph: return L("图表", "Graph")
         case .textAndGraph: return L("文字和图表", "Text & Graph")
@@ -184,6 +194,15 @@ public enum MenuBarDisplayStyle: String, Sendable, Codable, CaseIterable, Equata
         }
     }
 
+    public func label(for metric: MenuBarMetric) -> String {
+        guard metric == .networkThroughput else { return label }
+        switch self {
+        case .compactNetwork: return L("紧凑（上下两行）", "Compact (two lines)")
+        case .text: return L("文字（单行）", "Text (single line)")
+        default: return label
+        }
+    }
+
     /// Whether a caption would add anything. It would not for the two styles that
     /// already name their metric with a glyph, and the status dots are meant to be
     /// the smallest thing on the bar, so they carry no text at all. A bar is an
@@ -191,6 +210,7 @@ public enum MenuBarDisplayStyle: String, Sendable, Codable, CaseIterable, Equata
     public var supportsCaption: Bool {
         switch self {
         case .text, .graph, .textAndGraph, .bar: return true
+        case .compactNetwork, .ring, .ringSplit: return false
         case .iconAndText, .battery, .statusDot: return false
         }
     }
@@ -234,9 +254,41 @@ public struct MenuBarItemConfig: Sendable, Codable, Equatable, Hashable, Identif
         let c = try decoder.container(keyedBy: CodingKeys.self)
         id = c.value(.id, or: UUID())
         metric = c.value(.metric, or: MenuBarMetric.cpuUsage)
-        style = c.value(.style, or: MenuBarDisplayStyle.text)
+        if metric == .networkThroughput,
+           let rawStyle = try? c.decodeIfPresent(String.self, forKey: .style),
+           rawStyle == "text" {
+            // Older fork builds used `.text` for the compact two-line network display.
+            // Keep that presentation when loading their settings after introducing the
+            // explicit style option.
+            style = .compactNetwork
+        } else if metric == .networkThroughput,
+                  let rawStyle = try? c.decodeIfPresent(String.self, forKey: .style),
+                  rawStyle == "textInline" {
+            style = .text
+        } else {
+            style = c.value(.style, or: MenuBarDisplayStyle.text)
+        }
         isEnabled = c.value(.isEnabled, or: true)
         showsCaption = c.value(.showsCaption, or: true)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(metric, forKey: .metric)
+        let storedStyle: String
+        if metric == .networkThroughput {
+            switch style {
+            case .compactNetwork: storedStyle = "text" // readable by older fork builds
+            case .text: storedStyle = "textInline"
+            default: storedStyle = style.rawValue
+            }
+        } else {
+            storedStyle = style.rawValue
+        }
+        try c.encode(storedStyle, forKey: .style)
+        try c.encode(isEnabled, forKey: .isEnabled)
+        try c.encode(showsCaption, forKey: .showsCaption)
     }
 }
 
@@ -298,6 +350,7 @@ public struct MenuBarSettings: Sendable, Codable, Equatable {
         MenuBarItemConfig(metric: .cpuUsage, style: .text, showsCaption: true),
         MenuBarItemConfig(metric: .cpuTemperature, style: .text, showsCaption: true),
         MenuBarItemConfig(metric: .gpuUsage, style: .text, showsCaption: true),
+        MenuBarItemConfig(metric: .aiUsage, style: .ring, showsCaption: false),
         MenuBarItemConfig(metric: .battery, style: .battery, showsCaption: false),
     ]
 
@@ -985,7 +1038,7 @@ public struct Settings: Sendable, Codable, Equatable {
     public var shortcuts: ShortcutSettings
     public var theme: ThemeSettings
 
-    public static let currentSchemaVersion = 1
+    public static let currentSchemaVersion = 3
 
     public init(schemaVersion: Int = Settings.currentSchemaVersion,
                 general: GeneralSettings = .init(),
@@ -1016,7 +1069,7 @@ public struct Settings: Sendable, Codable, Equatable {
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        schemaVersion = c.value(.schemaVersion, or: Settings.currentSchemaVersion)
+        schemaVersion = c.value(.schemaVersion, or: 0)
         general = c.value(.general, or: GeneralSettings())
         menuBar = c.value(.menuBar, or: MenuBarSettings())
         panel = c.value(.panel, or: PanelSettings())

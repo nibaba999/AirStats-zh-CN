@@ -5,11 +5,12 @@ in review.
 
 ## Getting set up
 
-You need macOS 14 or later and the Swift 6 toolchain that ships with Xcode 16.
+You need macOS 14 or later and Xcode 26 or later. The project uses the macOS 26 SDK
+for the current interface and Swift 6 for its embedded Pulse module.
 
 ```sh
-git clone <your fork>
-cd airstats
+git clone https://github.com/nibaba999/AirStats-zh-CN.git
+cd AirStats-zh-CN
 swift build
 swift test
 Scripts/build.sh          # debug .app bundle
@@ -32,6 +33,11 @@ swift test
 
 If you touched anything that draws, attach the relevant render. If you touched a
 collector, say what you diffed its output against.
+
+Review [OPEN_SOURCE.md](OPEN_SOURCE.md) before changing vendored components. Preserve
+their upstream license headers and notices. Do not add assets whose license does not
+permit redistribution; the optional Pulse Grok Bot animation is intentionally omitted
+for this reason.
 
 `--probe` prints raw collector output, so you can check it against `top`, `vm_stat`,
 `netstat -ib`, `ioreg` and `pmset`. `--render` draws the menu bar, panel, desktop widget and

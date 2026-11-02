@@ -52,19 +52,22 @@ struct BatteryStyleAvailabilityTests {
     }
 }
 
-@Suite("The shipped menu bar is CPU, temperature, GPU and the battery")
+@Suite("The shipped menu bar includes system health, AI usage, and the battery")
 struct MenuBarDefaultItemsTests {
 
-    @Test("four readouts, in order")
+    @Test("five readouts, in order")
     func defaultsAreInOrder() {
         #expect(MenuBarSettings.defaultItems.map(\.metric)
-                == [.cpuUsage, .cpuTemperature, .gpuUsage, .battery])
+                == [.cpuUsage, .cpuTemperature, .gpuUsage, .aiUsage, .battery])
     }
 
     @Test("the battery ships as the indicator, the rest as captioned numbers")
     func defaultStyles() {
         let items = MenuBarSettings.defaultItems
-        #expect(items.dropLast().allSatisfy { $0.style == .text && $0.showsCaption })
+        #expect(items.filter { $0.metric != .aiUsage && $0.metric != .battery }
+                .allSatisfy { $0.style == .text && $0.showsCaption })
+        #expect(items.first { $0.metric == .aiUsage }?.style == .ring)
+        #expect(items.first { $0.metric == .aiUsage }?.showsCaption == false)
         #expect(items.last?.style == .battery)
     }
 

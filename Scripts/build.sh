@@ -15,7 +15,15 @@ CONFIG="${1:-debug}"
 swift build -c "$CONFIG" "${@:2}"
 
 BIN_DIR="$(swift build -c "$CONFIG" --show-bin-path)"
-APP="$BIN_DIR/AirStats.app"
+
+# File Provider-managed checkouts can re-attach FinderInfo to copied resource
+# bundles while codesign is walking them. When that metadata is present, assemble
+# the final app in a local temporary directory outside the synced checkout.
+APP_ROOT="$BIN_DIR"
+if xattr -p 'com.apple.fileprovider.fpfs#P' "$BIN_DIR/AirStats_Pulse.bundle" >/dev/null 2>&1; then
+  APP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/AirStats-app.XXXXXX")"
+fi
+APP="$APP_ROOT/AirStats.app"
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Frameworks"
@@ -52,6 +60,16 @@ else
   exit 1
 fi
 
+# Pulse is compiled as an internal module, with its localised strings, provider
+# marks, animated BotMark data and terminal integrations in its own resource bundle.
+PULSE_BUNDLE="$BIN_DIR/AirStats_Pulse.bundle"
+if [ -d "$PULSE_BUNDLE" ]; then
+  ditto "$PULSE_BUNDLE" "$APP/Contents/Resources/AirStats_Pulse.bundle"
+else
+  echo "error: $PULSE_BUNDLE is missing; the embedded Pulse UI would have no resources" >&2
+  exit 1
+fi
+
 # Sparkle is a framework, and the binary asks for it at @rpath. SwiftPM leaves a copy
 # beside the binary, which is why the bare `.build/debug/AirStats` runs; the bundle
 # needs its own, because the executable inside it resolves @rpath through
@@ -72,6 +90,9 @@ fi
 # not enable the updater, and changing its resources would invalidate its signature.
 # File-provider metadata copied onto a build product can prevent signing.
 xattr -cr "$APP" 2>/dev/null || true
+# `xattr -c` can leave FinderInfo on copied resource bundles and frameworks on
+# some macOS volumes; codesign rejects that attribute as resource-fork detritus.
+xattr -dr com.apple.FinderInfo "$APP" 2>/dev/null || true
 
 # Ad-hoc signature. Without any signature macOS refuses some window-server
 # privileges a status item needs.

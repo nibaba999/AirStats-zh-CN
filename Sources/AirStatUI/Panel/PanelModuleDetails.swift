@@ -212,10 +212,10 @@ extension PanelModuleView {
     private func gpuEntries(_ device: GPUDevice) -> [PanelDetailEntry] {
         var entries: [PanelDetailEntry] = []
         if let renderer = device.rendererUtilization {
-            entries.append(PanelDetailEntry("Renderer", formatter.percent(renderer)))
+            entries.append(PanelDetailEntry(L("渲染进程", "Renderer"), formatter.percent(renderer)))
         }
         if let tiler = device.tilerUtilization {
-            entries.append(PanelDetailEntry("Tiler", formatter.percent(tiler)))
+            entries.append(PanelDetailEntry(L("窗口合成进程", "Tiler"), formatter.percent(tiler)))
         }
         return entries
     }
@@ -430,7 +430,7 @@ extension PanelModuleView {
             entries.append(PanelDetailEntry(L("状况", "Condition"), condition))
         }
         if power.isLowPowerMode {
-            entries.append(PanelDetailEntry(L("低电量模式", "Low Power"), "On"))
+            entries.append(PanelDetailEntry(L("低电量模式", "Low Power"), L("开启", "On")))
         }
         return entries
     }

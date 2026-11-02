@@ -30,4 +30,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         coordinator?.showSettings()
         return true
     }
+
+    func application(_ application: NSApplication, open urls: [URL]) {
+        urls.forEach { coordinator?.open($0) }
+    }
 }

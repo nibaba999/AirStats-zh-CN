@@ -1,6 +1,8 @@
 import AppKit
+import SwiftUI
 import AirStatKit
 import AirStatUI
+import Pulse
 
 /// Wires the engine, the settings store and every piece of UI together, and owns
 /// the system-level observers (sleep, wake, screen lock, display changes) that
@@ -17,6 +19,7 @@ final class AppCoordinator {
     private let settingsWindow: SettingsWindowController
     private let thresholdMonitor: ThresholdMonitor
     private let hotKeys: GlobalHotKeyCenter
+    private let pulse: PulseEmbeddedController
 
     private var observers: [any NSObjectProtocol] = []
     /// Where the panel is currently hung. Kept here because with one status item per
@@ -28,13 +31,18 @@ final class AppCoordinator {
         let store = SettingsStore()
         let engine = MetricsEngine(settingsStore: store)
         let authority = NotificationAuthority()
+        let pulse = PulseEmbeddedController()
         self.settingsStore = store
         self.engine = engine
+        self.pulse = pulse
         self.statusItem = StatusItemController(engine: engine, settings: store)
         self.panel = PanelController(engine: engine, settings: store)
         self.desktopWidget = DesktopWidgetController(engine: engine, settings: store)
         self.settingsWindow = SettingsWindowController(engine: engine, settings: store,
-                                                      updater: nil, authority: authority)
+                                                      updater: nil, authority: authority,
+                                                      makeAIUsagePane: { [weak pulse] in
+                                                          pulse?.settingsPane() ?? AnyView(EmptyView())
+                                                      })
         self.thresholdMonitor = ThresholdMonitor(engine: engine, settings: store, authority: authority)
         self.hotKeys = GlobalHotKeyCenter(settings: store)
     }
@@ -53,6 +61,7 @@ final class AppCoordinator {
         }
         panel.onRequestSettings = { [weak self] in self?.showSettings() }
         panel.onRequestQuit = { NSApp.terminate(nil) }
+        pulse.onRequestSettings = { [weak self] in self?.showAIUsageSettings() }
 
         desktopWidget.onVisibilityChange = { [weak self] visible in
             self?.engine.setDesktopWidgetVisible(visible)
@@ -75,6 +84,10 @@ final class AppCoordinator {
         }
 
         statusItem.install()
+        pulse.start()
+        pulse.observeMenuBarSummary { [weak statusItem] summary in
+            statusItem?.updateAIUsage(summary)
+        }
         engine.start()
         thresholdMonitor.start()
         hotKeys.start()
@@ -137,6 +150,15 @@ final class AppCoordinator {
     func showSettings() {
         panel.hide()
         settingsWindow.show()
+    }
+
+    private func showAIUsageSettings() {
+        panel.hide()
+        settingsWindow.show(tab: .aiUsage)
+    }
+
+    func open(_ url: URL) {
+        pulse.open(url)
     }
 
     private func toggleDesktopWidget() {

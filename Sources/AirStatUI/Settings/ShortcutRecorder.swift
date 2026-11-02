@@ -99,7 +99,7 @@ struct ShortcutRecorderField: View {
                 .foregroundStyle(Design.Palette.tertiaryText)
                 .disabled(shortcut == nil)
                 .help(L("移除此快捷键", "Remove this shortcut"))
-                .accessibilityLabel("Remove the \(action.label) shortcut")
+                .accessibilityLabel(L("移除“\(action.label)”快捷键", "Remove the \(action.label) shortcut"))
             }
             if let rejection {
                 Text(rejection)

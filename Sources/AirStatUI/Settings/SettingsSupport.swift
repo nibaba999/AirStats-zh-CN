@@ -20,6 +20,7 @@ public enum SettingsTab: String, CaseIterable, Identifiable, Sendable {
     case general
     case menuBar, desktopWidget, notifications
     case appearance, shortcuts
+    case aiUsage
     case about
 
     public var id: String { rawValue }
@@ -32,6 +33,7 @@ public enum SettingsTab: String, CaseIterable, Identifiable, Sendable {
         case .desktopWidget: return L("桌面小组件", "Desktop Widget")
         case .notifications: return L("通知", "Notifications")
         case .shortcuts: return L("快捷键", "Shortcuts")
+        case .aiUsage: return L("AI 额度", "AI Usage")
         case .about: return L("关于", "About")
         }
     }
@@ -42,7 +44,7 @@ public enum SettingsTab: String, CaseIterable, Identifiable, Sendable {
     /// thing while General and About are not.
     var startsGroup: Bool {
         switch self {
-        case .menuBar, .appearance, .about: return true
+        case .menuBar, .appearance, .aiUsage, .about: return true
         default: return false
         }
     }
@@ -55,6 +57,7 @@ public enum SettingsTab: String, CaseIterable, Identifiable, Sendable {
         case .desktopWidget: return "macwindow.on.rectangle"
         case .notifications: return "bell.badge"
         case .shortcuts: return "keyboard"
+        case .aiUsage: return "sparkles.rectangle.stack"
         case .about: return "info.circle"
         }
     }
@@ -69,7 +72,7 @@ public enum SettingsTab: String, CaseIterable, Identifiable, Sendable {
         case .desktopWidget: return [.desktopWidget]
         case .notifications: return [.notifications]
         case .shortcuts: return [.shortcuts]
-        case .about: return []
+        case .aiUsage, .about: return []
         }
     }
 
@@ -156,6 +159,7 @@ struct MetricAvailability {
 
     /// Nil when the readout will work here; otherwise why it will not.
     func note(for metric: MenuBarMetric) -> String? {
+        if metric == .aiUsage { return nil }
         if let sourceNote = note(for: metric.requiredSource) { return sourceNote }
         switch metric {
         case .cpuFrequency:
@@ -317,16 +321,16 @@ struct RestoreDefaultsButton: View {
 
     var body: some View {
         Button(L("恢复默认", "Restore Defaults")) { isConfirming = true }
-            .confirmationDialog("Restore \(title) settings to their defaults?",
+            .confirmationDialog(L("将“\(title)”设置恢复为默认值？", "Restore \(title) settings to their defaults?"),
                                 isPresented: $isConfirming) {
                 Button(L("恢复默认", "Restore Defaults"), role: .destructive) {
                     for section in sections { settings.resetSection(section) }
                 }
                 Button(L("取消", "Cancel"), role: .cancel) {}
             } message: {
-                Text("Only \(title) is affected. Other settings are left alone.")
+                Text(L("仅恢复“\(title)”设置，其他设置不受影响。", "Only \(title) is affected. Other settings are left alone."))
             }
-            .accessibilityHint("Restores \(title) to its default values")
+            .accessibilityHint(L("将“\(title)”恢复为默认值", "Restores \(title) to its default values"))
     }
 }
 
@@ -482,12 +486,12 @@ struct ReorderControls: View {
     var body: some View {
         HStack(spacing: Design.Space.xxs) {
             RowIconButton(systemName: "chevron.up",
-                          help: "Move \(itemLabel) up",
-                          label: "Move \(itemLabel) up") { move(-1) }
+                          help: L("上移\(itemLabel)", "Move \(itemLabel) up"),
+                          label: L("上移\(itemLabel)", "Move \(itemLabel) up")) { move(-1) }
                 .disabled(!canMoveUp)
             RowIconButton(systemName: "chevron.down",
-                          help: "Move \(itemLabel) down",
-                          label: "Move \(itemLabel) down") { move(1) }
+                          help: L("下移\(itemLabel)", "Move \(itemLabel) down"),
+                          label: L("下移\(itemLabel)", "Move \(itemLabel) down")) { move(1) }
                 .disabled(!canMoveDown)
         }
     }
