@@ -6,22 +6,22 @@
 
 AirStats 简体中文版是一款 Mac 菜单栏状态监测工具，基于 [AirStats](https://github.com/byrencheema/airstats) 1.6 修改。它可以显示 CPU、内存、网络、磁盘、电池等状态。本项目是**非官方汉化适配**，与原作者没有隶属关系。
 
-### 当前版本：v1.7.0
+### 当前版本：v1.8.0
 
 - AI 额度监控已直接整合进 AirStats：状态栏默认用紧凑圆环显示额度比例，也可选择最多两个额度窗口的多时段圆环；在“设置 → 菜单栏 → AI 额度 → 显示方式”切换样式，在“设置 → AI 额度”管理服务商、账号、刷新、历史和提醒。
-- 点击 AirStats 菜单栏图标只打开 AirStats 状态面板；面板保留设置和退出操作，不再显示会另开浮动窗口的“AI 额度”按钮。
+- 点击 AirStats 菜单栏图标会打开整合面板：顶部可切换 AI 账号、查看全部额度窗口和重置时间、刷新额度及进入 AI 设置，下方仍是 CPU、内存等系统状态；没有配置服务时可从面板直接开始选择。
 - 网速提供“紧凑（上下两行）”和“文字（单行）”等显示方式，可在“菜单栏”设置中按需切换。
 - 刷新间隔可在“通用 → 更新间隔”中设置为 0.5、1、2、3、5、10 或 30 秒。
 
 ### 版本与语言
 
-- **中英文切换版：v1.7.0**，本仓库发布的版本。可在“通用 → 语言”选择简体中文或 English；退出并重新打开后生效。中文仍有少量提示、无障碍文字和第三方组件为英文。
+- **中英文切换版：v1.8.0**，本仓库发布的版本。可在“通用 → 语言”选择简体中文或 English；退出并重新打开后生效。中文仍有少量提示、无障碍文字和第三方组件为英文。
 - **英文原版：AirStats 1.6**，可访问[上游项目](https://github.com/byrencheema/airstats)下载；本仓库的中英文切换版属于非官方适配。
 - Pulse 已接入 77 种内置 AI 服务商/工具的额度读取与账号管理；状态栏只显示所选账号的额度窗口和预警，避免把完整配置和历史挤进菜单栏。
 
 ### 下载与安装
 
-前往 [Releases](https://github.com/nibaba999/AirStats-zh-CN/releases/tag/v1.7.0) 下载 `AirStats-zh-CN-v1.7.0-macOS-arm64.dmg`，打开后将 `AirStats.app` 拖到 `Applications` 文件夹。也可下载 ZIP，解压后安装。发布页提供 SHA-256 校验值和逐版本更新记录。
+前往 [Releases](https://github.com/nibaba999/AirStats-zh-CN/releases/tag/v1.8.0) 下载 `AirStats-zh-CN-v1.8.0-macOS-arm64.dmg`，打开后将 `AirStats.app` 拖到 `Applications` 文件夹。也可下载 ZIP，解压后安装。发布页提供 SHA-256 校验值和逐版本更新记录。
 
 **系统要求：**Apple 芯片 Mac、macOS 14 或更高版本。当前包未提供 Intel 版本。
 
@@ -59,8 +59,8 @@ AirStats Simplified Chinese Edition is an **unofficial adaptation** of [AirStats
 
 ### Editions and languages
 
-- **Bilingual edition: v1.7.0**, distributed from this repository. Select Simplified Chinese or English in General → Language, then quit and reopen the app. Some prompts, accessibility text and third-party components remain in English in Chinese mode.
-- AI quota monitoring is integrated into AirStats. The compact ring shows the selected account's quota by default; an optional multi-window ring can show up to two quota windows. Choose the style in Settings → Menu Bar → AI Usage → Display Style. Provider, account, refresh, history and alert settings remain in Settings → AI Usage. Clicking the AirStats menu bar icon opens its status panel, which no longer contains the redundant AI Usage button.
+- **Bilingual edition: v1.8.0**, distributed from this repository. Select Simplified Chinese or English in General → Language, then quit and reopen the app. Some prompts, accessibility text and third-party components remain in English in Chinese mode.
+- AI quota monitoring is integrated into AirStats. The compact ring shows the selected account's quota by default; an optional multi-window ring can show up to two quota windows. The click-down panel now embeds Pulse's live account overview with quota windows, reset times, account tabs, refresh and settings actions. Choose the menu-bar ring style in Settings → Menu Bar → AI Usage → Display Style.
 - Pulse includes quota readers and account management for more than 70 built-in AI services and tools; the status bar stays focused on the selected account's quota windows and warning state.
 - **Original English edition:** available from the [upstream AirStats project](https://github.com/byrencheema/airstats). This repository is an unofficial adaptation.
 - The combined network readout offers **Compact (two lines)** and **Text (single line)**, along with other display styles, in menu-bar settings. The compact style puts download above upload.
@@ -68,7 +68,7 @@ AirStats Simplified Chinese Edition is an **unofficial adaptation** of [AirStats
 
 ### Download and install
 
-Download `AirStats-zh-CN-v1.7.0-macOS-arm64.dmg` from [Releases](https://github.com/nibaba999/AirStats-zh-CN/releases/tag/v1.7.0), open it and drag `AirStats.app` to Applications. A ZIP, SHA-256 checksums and version-specific notes are also available.
+Download `AirStats-zh-CN-v1.8.0-macOS-arm64.dmg` from [Releases](https://github.com/nibaba999/AirStats-zh-CN/releases/tag/v1.8.0), open it and drag `AirStats.app` to Applications. A ZIP, SHA-256 checksums and version-specific notes are also available.
 
 **Requirements:** Apple silicon and macOS 14 or later. An Intel build is not provided.
 

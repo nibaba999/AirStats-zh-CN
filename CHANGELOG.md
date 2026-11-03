@@ -2,6 +2,24 @@
 
 This project follows versioned releases. Each entry describes user-visible changes; the linked GitHub release contains the downloadable build and checksum.
 
+## [1.8.0] — 2026-11-03
+
+### Added
+
+- Embedded Pulse's live account dashboard at the top of the AirStats click-down panel: account tabs, every reported quota window, reset times, and the optional token-spend summary.
+- Added working refresh and AI settings actions beside the dashboard heading, plus a service-selection prompt when monitoring has not been configured.
+- Reused Pulse's existing overview and detail views so the status-bar ring and click-down panel share the same account selection, warning threshold, and usage data.
+
+### Changed
+
+- The status-bar click now opens a panel that combines AI quota details with AirStats system readings; the removed placeholder AI button has not returned.
+- Updated the bilingual project and release documentation.
+
+### Packaging
+
+- Apple silicon; macOS 14 or later.
+- Ad-hoc signed; not Developer ID signed or notarized by Apple. Gatekeeper may show a warning.
+
 ## [1.7.0] — 2026-11-02
 
 ### Added

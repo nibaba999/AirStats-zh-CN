@@ -37,6 +37,7 @@ struct MenuDashboard: View {
     @Bindable var model: MenuDashboardModel
     /// Tells the menu the view's height changed, so the menu can grow with it.
     var onResize: (CGSize) -> Void = { _ in }
+    var width: CGFloat = 320
 
     static let width: CGFloat = 320
     /// The menu's own margins, measured against its items on macOS 26: the
@@ -69,7 +70,7 @@ struct MenuDashboard: View {
             .padding(.top, 8)
             .padding(.bottom, 4)
         }
-        .frame(width: Self.width, alignment: .leading)
+        .frame(width: width, alignment: .leading)
         .fixedSize(horizontal: false, vertical: true)
         .onGeometryChange(for: CGSize.self) { $0.size } action: { onResize($0) }
     }
@@ -177,6 +178,71 @@ struct MenuDashboard: View {
             }
         }
         .contentShape(.rect)
+    }
+}
+
+/// The same account overview Pulse normally puts in its own status-item menu,
+/// adapted to sit at the top of AirStats' click-down panel. The controls are
+/// actions with direct effects: refresh, open the real settings, or choose services.
+@MainActor
+struct EmbeddedUsageDashboard: View {
+    let store: UsageStore
+    let settings: AppSettings
+    @Bindable var model: MenuDashboardModel
+    let onRefresh: () -> Void
+    let onSettings: () -> Void
+    let onChooseServices: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 8) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(Color.accentColor)
+                Text(String.localized("AI usage"))
+                    .font(.system(size: 13, weight: .semibold))
+                Spacer(minLength: 8)
+                Button(action: onRefresh) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 12, weight: .medium))
+                        .frame(width: 24, height: 24)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.borderless)
+                .help(String.localized("Refresh AI usage"))
+                .disabled(settings.needsProviderSelection)
+
+                Button(action: onSettings) {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 12, weight: .medium))
+                        .frame(width: 24, height: 24)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.borderless)
+                .help(String.localized("AI usage settings"))
+            }
+            .padding(.horizontal, MenuDashboard.leading)
+            .padding(.top, 10)
+            .padding(.bottom, 6)
+
+            if settings.needsProviderSelection {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(String.localized("Choose AI services to see account limits, reset times and alerts here."))
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button(action: onChooseServices) {
+                        Label(String.localized("Choose services"), systemImage: "plus")
+                    }
+                    .buttonStyle(.borderless)
+                }
+                .padding(.horizontal, MenuDashboard.leading)
+                .padding(.bottom, 12)
+            } else {
+                MenuDashboard(store: store, settings: settings, model: model, width: 380)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

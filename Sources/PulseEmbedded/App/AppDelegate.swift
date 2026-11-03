@@ -253,6 +253,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         ))
     }
 
+    func embeddedUsageDashboard() -> AnyView {
+        AnyView(EmbeddedUsageDashboard(
+            store: store,
+            settings: settings,
+            model: dashboard,
+            onRefresh: { [weak self] in self?.store.refresh() },
+            onSettings: { [weak self] in self?.showSettings() },
+            onChooseServices: { [weak self] in
+                guard let self else { return }
+                self.showProviderSelection(providers: Set(Provider.builtIn), isInitial: true)
+            }
+        ))
+    }
+
     /// Pulse remains the source of truth for account selection, windows, and its
     /// warning threshold. AirStats consumes only this presentation-sized value.
     func embeddedMenuBarSummary() -> AIUsageMenuBarSummary? {

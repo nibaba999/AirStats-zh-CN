@@ -44,6 +44,12 @@ public final class PulseEmbeddedController {
         return host.makeEmbeddedSettingsPane()
     }
 
+    /// The live Pulse account overview embedded in AirStats' click-down panel.
+    public func panelDashboardContent() -> AnyView {
+        if !started { start() }
+        return host.embeddedUsageDashboard()
+    }
+
     /// Streams the same provider reading into AirStats' own status-item renderer.
     public func observeMenuBarSummary(_ handler: @escaping @MainActor (AIUsageMenuBarSummary?) -> Void) {
         summaryHandler = handler

@@ -29,20 +29,25 @@ public struct PanelRootView: View {
     private let updates: SoftwareUpdater?
     /// Absent in renderers and previews, where disclosure writes settings directly.
     private let layout: PanelLayoutState?
+    /// Pulse's live account dashboard, hosted above the system readings.
+    private let aiUsageContent: AnyView?
 
-    public init(engine: MetricsEngine, settings: SettingsStore, updates: SoftwareUpdater? = nil) {
+    public init(engine: MetricsEngine, settings: SettingsStore, updates: SoftwareUpdater? = nil,
+                aiUsageContent: AnyView? = nil) {
         self.engine = engine
         self.settings = settings
         self.updates = updates
         self.layout = nil
+        self.aiUsageContent = aiUsageContent
     }
 
     init(engine: MetricsEngine, settings: SettingsStore, updates: SoftwareUpdater?,
-         layout: PanelLayoutState) {
+         layout: PanelLayoutState, aiUsageContent: AnyView? = nil) {
         self.engine = engine
         self.settings = settings
         self.updates = updates
         self.layout = layout
+        self.aiUsageContent = aiUsageContent
     }
 
     public var body: some View {
@@ -58,6 +63,10 @@ public struct PanelRootView: View {
             }
             ScrollView(.vertical) {
                 VStack(alignment: .leading, spacing: 0) {
+                    if let aiUsageContent {
+                        aiUsageContent
+                        PanelSeparator()
+                    }
                     let captionColumnWidth = captionColumnWidth
                     ForEach(Array(modules.enumerated()), id: \.element) { index, module in
                         if index > 0 { PanelSeparator(isVisible: separatorNeeded(before: index)) }

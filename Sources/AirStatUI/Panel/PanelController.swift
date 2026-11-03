@@ -19,6 +19,7 @@ public final class PanelController: NSObject, NSWindowDelegate {
     private let settings: SettingsStore
     /// Absent in the offscreen renderer. The panel's update row is drawn from it.
     private let updates: SoftwareUpdater?
+    private let makeAIUsageContent: (@MainActor () -> AnyView?)?
     private var window: PanelWindow?
     private var layout: PanelLayoutState?
     private var isDisclosureTransitionActive = false
@@ -55,10 +56,12 @@ public final class PanelController: NSObject, NSWindowDelegate {
     /// bursts of use and is only released once the panel has genuinely been left alone.
     private static let windowReleaseDelay: Duration = .seconds(120)
 
-    public init(engine: MetricsEngine, settings: SettingsStore, updates: SoftwareUpdater? = nil) {
+    public init(engine: MetricsEngine, settings: SettingsStore, updates: SoftwareUpdater? = nil,
+                makeAIUsageContent: (@MainActor () -> AnyView?)? = nil) {
         self.engine = engine
         self.settings = settings
         self.updates = updates
+        self.makeAIUsageContent = makeAIUsageContent
         super.init()
     }
 
@@ -172,7 +175,7 @@ public final class PanelController: NSObject, NSWindowDelegate {
             self?.toggleModule(module)
         }
         let root = PanelRootView(engine: engine, settings: settings, updates: updates,
-                                 layout: layout)
+                                 layout: layout, aiUsageContent: makeAIUsageContent?())
             .environment(\.panelActions, PanelActions(
                 openSettings: { [weak self] in self?.onRequestSettings?() },
                 quit: { [weak self] in self?.onRequestQuit?() },

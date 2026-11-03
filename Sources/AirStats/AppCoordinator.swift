@@ -36,7 +36,10 @@ final class AppCoordinator {
         self.engine = engine
         self.pulse = pulse
         self.statusItem = StatusItemController(engine: engine, settings: store)
-        self.panel = PanelController(engine: engine, settings: store)
+        self.panel = PanelController(engine: engine, settings: store,
+                                     makeAIUsageContent: { [weak pulse] in
+                                         pulse?.panelDashboardContent()
+                                     })
         self.desktopWidget = DesktopWidgetController(engine: engine, settings: store)
         self.settingsWindow = SettingsWindowController(engine: engine, settings: store,
                                                       updater: nil, authority: authority,
